@@ -70,7 +70,7 @@ se pueda entregar a otro desarrollador sin problema. Nada raro.
 | Capa | Herramienta |
 |---|---|
 | Framework | Next.js (React) |
-| Lenguaje | TypeScript (el código del amigo en JS se pasa poco a poco) |
+| Lenguaje | TypeScript |
 | Estilos | Tailwind CSS |
 | Animaciones | GSAP + ScrollTrigger, Lenis para el desplazamiento suave |
 | Panel | Payload CMS, dentro del mismo proyecto |
@@ -124,6 +124,49 @@ se pueda entregar a otro desarrollador sin problema. Nada raro.
 - El cliente exporta en 4K (aunque haya grabado en 1080p), de 35 a 45 Mbps.
 - Usar portada propia en alta calidad, con el botón de reproducir del diseño.
 
+## Cómo encender el proyecto en local
+
+1. Abrir **Postgres.app** (la base de datos local `emanuel_portafolio` vive ahí).
+2. `npm install` (solo la primera vez) y `npm run dev`.
+3. Página: http://localhost:3000 · Panel: http://localhost:3000/admin
+4. `npm run seed` carga los datos iniciales sin duplicar: datos de la página, las tres
+   categorías y un usuario de prueba. El correo y la contraseña de ese usuario están en
+   `.env`, que no se sube a GitHub; `.env.example` explica cada variable.
+5. Antes de guardar cambios: `npx tsc --noEmit`, `npm run lint` y `npm run build`.
+
+## Cómo está armado
+
+- `src/app/(frontend)/`: la página pública. `page.tsx` arma las secciones y
+  `globals.css` tiene los colores y las letras (Tailwind 4, bloque `@theme`).
+- `src/app/(payload)/`: el panel y la API de Payload. Lo genera Payload; no se edita a mano.
+- `src/collections/`:
+  - `Trabajos`: video corto, YouTube o foto, con borradores.
+  - `Categorias`: el nombre para el link se crea solo, sin tildes ni eñes.
+  - `Media`: crea 5 tamaños webp de cada foto y una versión borrosa.
+  - `Users`
+- `src/globals/Sitio.ts`: datos de la página (general, entrada, sobre mí, contacto).
+- `src/lib/vista.ts`: convierte los datos de Payload en datos simples para los
+  componentes. Solo se muestran los trabajos publicados y completos.
+- `src/components/`:
+  - `Entrada`: el nombre sube palabra por palabra y el video crece al bajar.
+  - `Trabajos`: carrusel de categorías.
+  - `Galeria`: cuadrícula de trabajos.
+  - `Visor`: trabajo en grande, con flechas, deslizar y Escape.
+  - `PantallaCarga`: la "E" del diseño original.
+  - `ScrollSuave`: Lenis junto con GSAP.
+  - `Animaciones`: todo lo marcado con `data-aparecer` aparece al bajar.
+- Todo respeta la opción "reducir movimiento" del dispositivo.
+- **Letras:** Instrument Serif para títulos y Instrument Sans para el texto. Se sirven
+  desde la misma página (`next/font`).
+- **Colores:** fondo `#ffffff`, tinta `#0b0b0b`, gris `#6b6b6b`, línea `#e6e6e3` y
+  suave `#f3f3f1`.
+- Al publicar o borrar algo en el panel, la página se vuelve a armar sola
+  (`src/hooks/revalidar.ts`).
+- Con las variables `S3_*` llenas, los archivos van a Cloudflare R2 con subida directa
+  desde el navegador. Sin ellas, se guardan en `/media`, que no se sube a GitHub.
+- La sección "Film photography" del HTML del amigo se quitó porque era de la plantilla
+  de conciertos; sigue en `respaldo/`.
+
 ## Estado
 
 - [x] Revisión de la referencia y preguntas al cliente (WhatsApp, 16 preguntas)
@@ -131,9 +174,11 @@ se pueda entregar a otro desarrollador sin problema. Nada raro.
 - [x] Guardar el código HTML del amigo tal cual, como punto de partida
 - [x] Crear el repositorio local con esa primera versión
 - [ ] Subir el repositorio a GitHub privado (Sebastian debe iniciar sesión primero)
-- [ ] Pasar el HTML a Next.js sin cambiar cómo se ve
-- [ ] Aplicar el estilo blanco y minimalista
-- [ ] Hacer el panel y las galerías de videos
+- [x] Proyecto Next.js + Payload con la estructura del amigo y el estilo blanco
+      minimalista, en la rama `feat/proyecto-nextjs`
+- [x] Panel en español: trabajos, categorías, archivos y datos de la página
+- [x] Probado en computador y celular: galería, visor, video, YouTube y borradores
+- [ ] Contenido real del cliente
 - [ ] Publicar
 
 ## Pendientes
@@ -142,3 +187,19 @@ se pueda entregar a otro desarrollador sin problema. Nada raro.
   contacto.
 - Al publicar: crear las cuentas de Cloudflare, Render y Neon a nombre del cliente. R2
   pide una tarjeta registrada aunque no cobre mientras no pase del límite gratis.
+- **Definir cómo se publica en dos partes.** Hoy es una sola aplicación de Next.js
+  (página y panel). Para el plan gratis hay que separar la página pública, que va
+  estática a Cloudflare, del panel, que va a Render, y conectar el aviso de "volver a
+  armar" al publicar.
+- **Actualizar Node.js.** Payload pide la versión 22.23.4 o más nueva; el Mac tiene la
+  22.23.2. Funciona, pero sale una advertencia al instalar.
+- **Datos de prueba en la base local.** Hay cuatro trabajos "PRUEBA" en Bodas (tres
+  publicados y un borrador) y tres archivos de prueba. Borrarlos antes de cargar el
+  contenido real.
+- **Número de WhatsApp del cliente.** El botón aparece solo cuando se llena en el panel.
+- **Textos entre [corchetes]** en "Sobre mí": pendientes del cliente.
+- **Logo:** cambiar el logo de Payload en el panel por el de Emanuel cuando lo haya.
+- **Borrar la ubicación GPS de la foto original.** Las versiones que se muestran ya
+  salen sin ella.
+- **Aviso de foto muy pequeña** al subirla.
+- **Ajuste de exportación** para el programa de edición del cliente.

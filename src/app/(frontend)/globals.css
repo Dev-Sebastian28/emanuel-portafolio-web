@@ -1,0 +1,67 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-fondo: #ffffff;
+  --color-tinta: #0b0b0b;
+  --color-gris: #6b6b6b;
+  --color-linea: #e6e6e3;
+  --color-suave: #f3f3f1;
+
+  --font-display: var(--font-instrument-serif), 'Times New Roman', serif;
+  --font-sans: var(--font-instrument-sans), system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+@layer base {
+  html {
+    background: var(--color-fondo);
+    color: var(--color-tinta);
+    -webkit-font-smoothing: antialiased;
+    scroll-padding-top: 5rem;
+  }
+
+  ::selection {
+    background: var(--color-tinta);
+    color: var(--color-fondo);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-tinta);
+    outline-offset: 3px;
+  }
+}
+
+@utility etiqueta {
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-gris);
+}
+
+@utility sin-barra {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Seguro: si el código de la página tarda en llegar (internet lento), la pantalla de carga
+   se quita sola a los 4 segundos para no tapar el contenido. */
+.pantalla-carga {
+  animation: salida-carga 0.7s ease 4s forwards;
+}
+
+@keyframes salida-carga {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+/* Luz suave que sigue al cursor en la entrada (idea del diseño original). */
+.luz {
+  background: radial-gradient(
+    560px circle at var(--x, 50%) var(--y, 30%),
+    rgb(0 0 0 / 0.06),
+    transparent 65%
+  );
+}
