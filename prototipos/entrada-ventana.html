@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Prototipo — Entrada "el nombre como ventana"</title>
+<!--
+  PROTOTIPO 2 del catálogo de entradas. El video se ve a través de las letras del nombre;
+  al bajar, se "entra" por la E y el video llena la pantalla.
+  Video de prueba: "video-prueba.mp4" en esta carpeta si existe; si no, un clip gratis de Mixkit.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@500&family=Instrument+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.css">
+<style>
+:root{
+  --bg:#fff; --ink:#0b0b0b; --muted:#6b6b6b; --line:#e6e6e3; --soft:#f3f3f1;
+  --display:'Instrument Serif','Times New Roman',serif;
+  --body:'Instrument Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+  --gutter:20px;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink)}
+body{font:400 1rem/1.5 var(--body);-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+#loader{position:fixed;inset:0;z-index:100;display:grid;place-items:center;background:var(--bg);transition:opacity .6s,visibility .6s}
+#loader.done{opacity:0;visibility:hidden}
+#loader span{font:400 7rem/1 var(--display);animation:pulse 1s ease-in-out infinite alternate}
+@keyframes pulse{from{opacity:.2;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
+
+.top{position:fixed;inset:0 0 auto;z-index:20;display:flex;align-items:center;gap:24px;height:60px;padding:0 var(--gutter);
+  padding-top:env(safe-area-inset-top,0px);color:var(--ink);transition:color .35s;opacity:0}
+.top .logo{font:400 1.9rem/1 var(--display);margin-right:auto}
+.top nav{display:flex;gap:22px;font-size:.92rem}
+.top.inverse{color:#fff}
+@media(max-width:560px){.top nav a:not(:last-child){display:none}}
+
+/* ---------- Entrada ---------- */
+#inicio .stage{position:relative;height:100vh;height:100svh;overflow:hidden;background:#fff;isolation:isolate}
+.bg{position:absolute;inset:-3%;width:106%;height:106%;object-fit:cover;display:block}
+
+/* Capa blanca con letras negras. Con "screen", lo blanco tapa y lo negro deja ver el video. */
+.mask{position:absolute;inset:0;background:#fff;mix-blend-mode:screen;display:grid;place-items:center;pointer-events:none}
+.name{font:400 min(25vw,38vh)/.84 var(--display);letter-spacing:-.035em;color:#000;text-align:center;margin:0}
+.name .w{display:block;overflow:hidden;padding:0 .04em .07em}
+.name .w > span{display:block}
+.name .l2{font-style:italic}
+
+.role{position:absolute;left:var(--gutter);top:calc(60px + 3vh);margin:0;font-size:.75rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.hint{position:absolute;left:50%;bottom:calc(4vh + env(safe-area-inset-bottom,0px));transform:translateX(-50%);font-size:.82rem;color:var(--muted);letter-spacing:.04em;white-space:nowrap}
+.hint i{display:inline-block;font-style:normal;animation:bob 1.6s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(4px)}}
+
+.caption{position:absolute;z-index:3;left:var(--gutter);right:var(--gutter);bottom:calc(5vh + env(safe-area-inset-bottom,0px));color:#fff;opacity:0;pointer-events:none}
+.caption h2{margin:0;font:400 clamp(2.6rem,6.4vw,5.8rem)/.95 var(--display);letter-spacing:-.02em}
+.caption h2 span{white-space:nowrap}
+.caption h2 span + span::before{content:" · "}
+.caption p{margin:.8rem 0 0;font-size:.95rem;opacity:.85}
+
+@media (orientation:portrait){
+  .name{font-size:28vw}
+  .caption h2 span{display:block}.caption h2 span + span::before{content:none}
+}
+
+#trabajos{position:relative;z-index:1;background:var(--bg);padding:96px var(--gutter) 120px}
+#trabajos .kicker{font:500 .8rem/1 var(--mono);letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+#trabajos h2{font:400 clamp(3rem,10vw,7rem)/.9 var(--display);letter-spacing:-.02em;margin:.6rem 0 2rem}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.cards div{aspect-ratio:4/5;background:var(--soft);display:grid;place-items:end start;padding:14px;font-size:.85rem;color:var(--muted)}
+.note{margin-top:2.5rem;color:var(--muted);font-size:.9rem;max-width:52ch}
+
+@media (prefers-reduced-motion:reduce){#loader span,.hint i{animation:none}}
+</style>
+</head>
+<body>
+
+<div id="loader" aria-hidden="true"><span>E</span></div>
+
+<header class="top" id="top">
+  <a class="logo" href="#inicio" aria-label="Emanuel Fonseca, inicio">E</a>
+  <nav aria-label="Principal">
+    <a href="#trabajos">Trabajos</a>
+    <a href="#trabajos">Sobre él</a>
+    <a href="#trabajos">Contacto</a>
+  </nav>
+</header>
+
+<main>
+  <section id="inicio" aria-label="Inicio">
+    <div class="stage" id="stage">
+      <video id="intro" class="bg" muted loop playsinline preload="auto" aria-hidden="true">
+        <source src="video-prueba.mp4" type="video/mp4">
+        <source src="https://assets.mixkit.co/videos/40584/40584-720.mp4" type="video/mp4">
+      </video>
+
+      <div class="mask" id="mask" aria-hidden="true">
+        <p class="name"><span class="w"><span class="l1">Emanuel</span></span><span class="w"><span class="l2">Fonseca</span></span></p>
+      </div>
+      <h1 class="sr">Emanuel Fonseca</h1>
+
+      <p class="role" id="role">Video y producción audiovisual — Bogotá</p>
+
+      <div class="caption" id="caption">
+        <h2><span>Bodas</span><span>15 años</span><span>Eventos</span></h2>
+        <p>Historias en video, contadas como se vivieron.</p>
+      </div>
+      <div class="hint" id="hint">Ver trabajos <i>↓</i></div>
+    </div>
+  </section>
+
+  <section id="trabajos">
+    <div class="kicker">01 — Galería</div>
+    <h2>Bodas</h2>
+    <div class="cards"><div>Video 1</div><div>Video 2</div><div>Video 3</div><div>Video 4</div></div>
+    <p class="note">Prototipo: solo la entrada. Las galerías de aquí para abajo son de relleno para ver cómo se pasa de una parte a la otra.</p>
+  </section>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const stage = $("stage"), mask = $("mask"), video = $("intro"), top_ = $("top");
+const quiet = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const finePointer = matchMedia("(pointer: fine)").matches;
+
+if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+scrollTo(0, 0);
+gsap.registerPlugin(ScrollTrigger);
+ScrollTrigger.config({ ignoreMobileResize: true });
+
+let lenis = null;
+if (!quiet) {
+  lenis = new Lenis({ lerp: .09 });
+  lenis.stop();
+  lenis.on("scroll", ScrollTrigger.update);
+  gsap.ticker.add(t => lenis.raf(t * 1000));
+  gsap.ticker.lagSmoothing(0);
+  new IntersectionObserver(([e]) => { e.isIntersecting ? video.play().catch(() => {}) : video.pause(); }, { threshold: .05 }).observe(stage);
+}
+
+/* Busca el palo vertical de la "E" (la parte más gruesa) para entrar justo por ahí.
+   Dibuja la letra en un lienzo oculto y mira qué columna tiene más tinta. */
+function puntoDeEntrada() {
+  const span = document.querySelector(".l1"), texto = span.firstChild;
+  const rango = document.createRange(); rango.setStart(texto, 0); rango.setEnd(texto, 1);
+  const r = rango.getBoundingClientRect(), m = stage.getBoundingClientRect();
+  const cs = getComputedStyle(span), fs = parseFloat(cs.fontSize);
+  const W = Math.ceil(r.width) + 4, H = Math.ceil(fs * 1.3);
+  const c = document.createElement("canvas"); c.width = W; c.height = H;
+  const ctx = c.getContext("2d", { willReadFrequently: true });
+  ctx.font = `${cs.fontStyle} 400 ${fs}px ${cs.fontFamily}`;
+  ctx.fillText("E", 0, fs);
+  const px = ctx.getImageData(0, 0, W, H).data, cols = new Array(W).fill(0);
+  for (let x = 0; x < W; x++) for (let y = 0; y < H; y++) if (px[(y * W + x) * 4 + 3] > 140) cols[x]++;
+  const max = Math.max(...cols), palo = cols.map((n, x) => n >= max * .92 ? x : -1).filter(x => x >= 0);
+  const ancho = Math.max(palo.length, 4), cx = palo.length ? (palo[0] + palo[palo.length - 1]) / 2 : W * .2;
+  const ox = r.left - m.left + cx, oy = r.top - m.top + r.height * .5;
+  // El palo se lleva al centro mientras crece; esta es la escala para que tape todo el ancho
+  const escala = Math.min(90, (m.width / ancho) * 1.15);
+  return { ox, oy, escala, dx: m.width / 2 - ox, dy: m.height / 2 - oy };
+}
+let entrada = { ox: 0, oy: 0, escala: 40, dx: 0, dy: 0 };
+function medir() {
+  gsap.set(mask, { scale: 1, x: 0, y: 0 });
+  entrada = puntoDeEntrada();
+  gsap.set(mask, { transformOrigin: `${entrada.ox}px ${entrada.oy}px` });
+}
+
+function buildScroll() {
+  const tl = gsap.timeline({
+    defaults: { ease: "none" },
+    scrollTrigger: {
+      trigger: "#inicio", start: "top top", end: () => "+=" + innerHeight * 1.5,
+      pin: stage, scrub: true, invalidateOnRefresh: true,
+      onRefreshInit: medir, onUpdate: setHeaderColor
+    }
+  });
+  tl.to(["#role", "#hint"], { autoAlpha: 0, duration: .1 }, 0)
+    .fromTo(mask, { scale: 1 }, { scale: () => entrada.escala, duration: .7, ease: "power3.in" }, 0)
+    .fromTo(mask, { x: 0, y: 0 }, { x: () => entrada.dx, y: () => entrada.dy, duration: .7, ease: "power2.inOut" }, 0)
+    .to(mask, { opacity: 0, duration: .14 }, .54)
+    .fromTo("#caption", { autoAlpha: 0, y: 30 }, { autoAlpha: 1, y: 0, duration: .16, ease: "power2.out" }, .78)
+    .to({}, { duration: .1 });
+  return tl;
+}
+
+/* Menú en blanco mientras el video está detrás */
+let tl = null;
+function setHeaderColor() {
+  const abierto = tl ? tl.time() > .5 : false;
+  top_.classList.toggle("inverse", abierto && stage.getBoundingClientRect().bottom > 30);
+}
+addEventListener("scroll", setHeaderColor, { passive: true });
+
+/* Mirar por la ventana: el video se mueve un poquito con el cursor */
+if (!quiet && finePointer) {
+  const vx = gsap.quickTo(video, "x", { duration: .9, ease: "power3.out" });
+  const vy = gsap.quickTo(video, "y", { duration: .9, ease: "power3.out" });
+  stage.addEventListener("pointermove", e => {
+    const r = stage.getBoundingClientRect();
+    vx(((e.clientX - r.left) / r.width - .5) * -28);
+    vy(((e.clientY - r.top) / r.height - .5) * -18);
+  });
+}
+
+function intro() {
+  $("loader").classList.add("done");
+  if (quiet) { gsap.set(".top", { opacity: 1 }); return; }
+  gsap.timeline({ defaults: { ease: "expo.out" } })
+    .from(".name .w > span", { yPercent: 110, duration: 1.3, stagger: .12 }, .15)
+    .from(["#role", "#hint"], { opacity: 0, y: 14, duration: .9 }, .8)
+    .to(".top", { opacity: 1, duration: .8, ease: "power1.out" }, .8)
+    .add(() => lenis && lenis.start(), 1.3);
+}
+
+const minWait = new Promise(r => setTimeout(r, 900));
+const videoReady = new Promise(r => {
+  if (video.readyState >= 2) return r();
+  video.addEventListener("loadeddata", r, { once: true });
+  setTimeout(r, 2500);
+});
+const fonts = document.fonts ? document.fonts.ready : Promise.resolve();
+Promise.all([minWait, videoReady, fonts]).then(() => {
+  if (quiet) { video.pause(); medir(); }
+  else { tl = buildScroll(); ScrollTrigger.refresh(); }
+  intro();
+});
+</script>
+<script src="catalogo.js"></script>
+</body>
+</html>

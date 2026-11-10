@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Catálogo de entradas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@500&family=Instrument+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#fff; --ink:#0b0b0b; --muted:#6b6b6b; --line:#e6e6e3; --soft:#f3f3f1; --rojo:#e0322b;
+  --display:'Instrument Serif','Times New Roman',serif;
+  --body:'Instrument Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+  --foto:url("https://assets.mixkit.co/videos/40584/40584-thumb-720-0.jpg");
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink)}
+body{font:400 1rem/1.55 var(--body);-webkit-font-smoothing:antialiased;padding:0 20px}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.wrap{max-width:1120px;margin:0 auto;padding:64px 0 96px}
+
+.kicker{font:500 .72rem/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1{font:400 clamp(3rem,9vw,6.5rem)/.92 var(--display);letter-spacing:-.03em;margin:.8rem 0 1.4rem}
+h1 em{font-style:italic}
+.intro{max-width:60ch;color:var(--muted);margin:0}
+.intro strong{color:var(--ink);font-weight:500}
+.how{display:flex;flex-wrap:wrap;gap:8px 22px;margin:1.6rem 0 0;padding:0;list-style:none;font-size:.9rem}
+.how li::before{content:"— ";color:var(--muted)}
+
+.list{display:grid;gap:18px;margin-top:56px}
+.card{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);border:1px solid var(--line);text-decoration:none;transition:border-color .2s}
+.card:hover{border-color:var(--ink)}
+.card:hover .go{gap:.8em}
+.body{padding:28px 28px 24px;display:flex;flex-direction:column}
+.num{font:500 .72rem/1 var(--mono);letter-spacing:.14em;color:var(--muted);display:flex;gap:12px;align-items:center}
+.tag{font:500 .66rem/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;padding:5px 7px;border:1px solid var(--ink);color:var(--ink)}
+.card h2{font:400 clamp(2rem,4vw,2.9rem)/1 var(--display);letter-spacing:-.02em;margin:.9rem 0 .7rem}
+.card p{margin:0;color:#333;max-width:52ch}
+dl{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;margin:1.4rem 0 1.6rem;font-size:.88rem}
+dt{color:var(--muted)}
+dd{margin:0}
+.go{margin-top:auto;display:inline-flex;gap:.5em;align-items:center;font-weight:500;transition:gap .2s}
+
+/* Vistas previas: dibujos quietos de cómo arranca cada entrada */
+.pv{position:relative;min-height:280px;background:var(--soft);overflow:hidden;border-left:1px solid var(--line)}
+.pv-in{position:absolute;inset:18px;background:#fff;overflow:hidden}
+.pv .w1,.pv .w2{position:absolute;font:400 clamp(2.2rem,5vw,3.6rem)/.86 var(--display);letter-spacing:-.03em}
+
+.pv-visor .w1{left:14px;top:12px}
+.pv-visor .w2{right:14px;bottom:10px;font-style:italic}
+.pv-visor .scr{position:absolute;left:50%;top:50%;width:46%;aspect-ratio:16/9;transform:translate(-50%,-50%);background:var(--foto) center/cover}
+.pv-visor .scr::before{content:"● REC";position:absolute;left:7px;top:6px;color:#fff;font:500 8px/1 var(--mono);letter-spacing:.08em}
+.pv-visor .scr::after{content:"00:00:12:04";position:absolute;right:7px;top:6px;color:#fff;font:500 8px/1 var(--mono)}
+.pv-visor .scr i{position:absolute;inset:16px 7px 7px;border:1.5px solid #fff;
+  -webkit-mask:linear-gradient(#000,#000) top left/10px 10px no-repeat,linear-gradient(#000,#000) top right/10px 10px no-repeat,linear-gradient(#000,#000) bottom left/10px 10px no-repeat,linear-gradient(#000,#000) bottom right/10px 10px no-repeat;
+          mask:linear-gradient(#000,#000) top left/10px 10px no-repeat,linear-gradient(#000,#000) top right/10px 10px no-repeat,linear-gradient(#000,#000) bottom left/10px 10px no-repeat,linear-gradient(#000,#000) bottom right/10px 10px no-repeat}
+
+.pv-ventana .pv-in{display:grid;place-items:center}
+.pv-ventana .txt{font:400 clamp(4rem,9vw,6.6rem)/.84 var(--display);letter-spacing:-.04em;text-align:center;
+  background:var(--foto) center/cover;-webkit-background-clip:text;background-clip:text;color:transparent}
+.pv-ventana .txt em{display:block;font-style:italic}
+
+.pv-revelado .pv-in{background:var(--foto) center/cover}
+.pv-revelado .pv-in::before{content:"";position:absolute;inset:0;background:inherit;filter:grayscale(1) sepia(.3) brightness(1.9)}
+.pv-revelado .pv-in::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,#fff 18%,rgba(255,255,255,.7) 48%,rgba(255,255,255,0) 82%)}
+.pv-revelado .w1,.pv-revelado .w2{z-index:1;left:14px}
+.pv-revelado .w1{bottom:calc(10px + .86em)}
+.pv-revelado .w2{bottom:10px;font-style:italic}
+
+.pv-contactos .pv-in{padding:12px;display:grid;grid-template-columns:repeat(5,1fr);grid-auto-rows:1fr;gap:6px}
+.pv-contactos .pv-in span{background:center/cover;min-height:0}
+.pv-contactos .pv-in span.sel{outline:2px solid var(--rojo);outline-offset:3px}
+
+@media(max-width:760px){
+  .card{grid-template-columns:1fr}
+  .pv{order:-1;min-height:220px;border-left:0;border-bottom:1px solid var(--line)}
+  .body{padding:22px 20px 20px}
+}
+.foot{margin-top:48px;color:var(--muted);font-size:.88rem;max-width:64ch}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kicker">Emanuel Fonseca — página web</div>
+  <h1>Entradas <em>para probar</em></h1>
+  <p class="intro">Cuatro ideas para la animación de inicio. Son <strong>prototipos</strong>: el video y las fotos son de prueba (clips gratis de Mixkit) y los textos son de relleno. Ninguna está todavía en la página real.</p>
+  <ul class="how">
+    <li>Abrir cada una y bajar despacio</li>
+    <li>Mover el cursor por la entrada</li>
+    <li>Probarlas también en el celular</li>
+    <li>La barrita de arriba pasa de una a otra</li>
+  </ul>
+
+  <div class="list">
+    <a class="card" href="entrada-visor.html">
+      <div class="body">
+        <div class="num">01 <span class="tag">Elegida por ahora</span></div>
+        <h2>Visor de grabación</h2>
+        <p>El video aparece en la pantalla de una cámara que está grabando: esquinas, "REC" y contador de tiempo. Al bajar, la pantalla crece hasta llenarlo todo. El cuadro de enfoque sigue al cursor.</p>
+        <dl>
+          <dt>Necesita</dt><dd>1 video de entrada (horizontal y vertical)</dd>
+          <dt>En celular</dt><dd>Liviana</dd>
+          <dt>A favor</dt><dd>Dice "videógrafo" desde el primer segundo</dd>
+          <dt>Ojo</dt><dd>Los detalles de cámara no deben tapar el video</dd>
+        </dl>
+        <span class="go">Ver la entrada <span aria-hidden="true">→</span></span>
+      </div>
+      <div class="pv pv-visor" aria-hidden="true"><div class="pv-in"><span class="w1">Emanuel</span><div class="scr"><i></i></div><span class="w2">Fonseca</span></div></div>
+    </a>
+
+    <a class="card" href="entrada-ventana.html">
+      <div class="body">
+        <div class="num">02</div>
+        <h2>El nombre como ventana</h2>
+        <p>El video se ve a través de las letras del nombre, sobre la página blanca. Al bajar, se entra por la "E" y el video termina llenando la pantalla. Con el cursor, el video se mueve un poco, como si se mirara por una ventana.</p>
+        <dl>
+          <dt>Necesita</dt><dd>1 video de entrada</dd>
+          <dt>En celular</dt><dd>Liviana</dd>
+          <dt>A favor</dt><dd>La más minimalista: el nombre es el protagonista</dd>
+          <dt>Ojo</dt><dd>Las letras son delgadas; en celular se ve poco video al principio</dd>
+        </dl>
+        <span class="go">Ver la entrada <span aria-hidden="true">→</span></span>
+      </div>
+      <div class="pv pv-ventana" aria-hidden="true"><div class="pv-in"><div class="txt">Emanuel<em>Fonseca</em></div></div></div>
+    </a>
+
+    <a class="card" href="entrada-revelado.html">
+      <div class="body">
+        <div class="num">03</div>
+        <h2>Revelado</h2>
+        <p>La página empieza en blanco, como papel fotográfico. Al bajar, la imagen aparece como una foto en el revelado: primero las sombras, después los tonos y al final el color. Con el cursor se "frota" el papel y se revela más rápido.</p>
+        <dl>
+          <dt>Necesita</dt><dd>1 video de entrada</dd>
+          <dt>En celular</dt><dd>Media: los filtros trabajan en cada cuadro del video</dd>
+          <dt>A favor</dt><dd>La más emotiva, y saca provecho del fondo blanco</dd>
+          <dt>Ojo</dt><dd>Hay que probarla en celulares sencillos</dd>
+        </dl>
+        <span class="go">Ver la entrada <span aria-hidden="true">→</span></span>
+      </div>
+      <div class="pv pv-revelado" aria-hidden="true"><div class="pv-in"><span class="w1">Emanuel</span><span class="w2">Fonseca</span></div></div>
+    </a>
+
+    <a class="card" href="entrada-contactos.html">
+      <div class="body">
+        <div class="num">04</div>
+        <h2>Hoja de contactos</h2>
+        <p>Arranca como la hoja de contactos de un fotógrafo: muchos cuadros de bodas, 15 años y eventos, con uno marcado en rojo. Al bajar se entra a ese cuadro, que es un video. El cursor es una lupa, como la que se usa con estas hojas.</p>
+        <dl>
+          <dt>Necesita</dt><dd>1 video + 12 a 15 fotos de sus trabajos</dd>
+          <dt>En celular</dt><dd>Media</dd>
+          <dt>A favor</dt><dd>Muestra de una la variedad de trabajos</dd>
+          <dt>Ojo</dt><dd>Depende de tener buenas fotos de cada categoría</dd>
+        </dl>
+        <span class="go">Ver la entrada <span aria-hidden="true">→</span></span>
+      </div>
+      <div class="pv pv-contactos" aria-hidden="true"><div class="pv-in" id="mini"></div></div>
+    </a>
+  </div>
+
+  <p class="foot">Las cuatro respetan la opción "reducir movimiento" del celular o computador: si está activada, la entrada se muestra quieta. Para ver una con un video de Emanuel, se pone el archivo en esta carpeta con el nombre <code>video-prueba.mp4</code>.</p>
+</div>
+<script>
+  // Miniatura de la hoja de contactos
+  const ids = [5223, 40601, 48636, 5217, 18204, 46896, 5224, 40584, 344, 40587, 4151, 5186, 40591, 5227, 40593];
+  document.getElementById("mini").innerHTML = ids.map((id, i) =>
+    `<span class="${i === 7 ? "sel" : ""}" style="background-image:url(https://assets.mixkit.co/videos/${id}/${id}-thumb-360-0.jpg)"></span>`).join("");
+</script>
+</body>
+</html>

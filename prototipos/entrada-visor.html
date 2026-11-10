@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Prototipo — Entrada "visor de grabación"</title>
+<!--
+  PROTOTIPO de la entrada. No es la página final: sirve para ver el movimiento y decidir.
+  Video de prueba: si existe "video-prueba.mp4" en esta misma carpeta, se usa ese
+  (por ejemplo, un clip de Emanuel). Si no, se usa un clip gratis de Mixkit.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@500&family=Instrument+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.css">
+<style>
+:root{
+  /* Mismos colores y letras de la página real (src/app/(frontend)/globals.css) */
+  --bg:#fff; --ink:#0b0b0b; --muted:#6b6b6b; --line:#e6e6e3; --soft:#f3f3f1; --rec:#e0322b;
+  --display:'Instrument Serif','Times New Roman',serif;
+  --body:'Instrument Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+  --gutter:20px;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink)}
+body{font:400 1rem/1.5 var(--body);-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+
+/* ---------- Pantalla de carga: la "E" del amigo, en blanco y negro ---------- */
+#loader{position:fixed;inset:0;z-index:100;display:grid;place-items:center;background:var(--bg);transition:opacity .6s,visibility .6s}
+#loader.done{opacity:0;visibility:hidden}
+#loader span{font:400 7rem/1 var(--display);color:var(--ink);animation:pulse 1s ease-in-out infinite alternate}
+@keyframes pulse{from{opacity:.2;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
+
+/* ---------- Menú ---------- */
+.top{position:fixed;inset:0 0 auto;z-index:20;display:flex;align-items:center;gap:24px;height:60px;padding:0 var(--gutter);
+  padding-top:env(safe-area-inset-top,0px);color:var(--ink);transition:color .35s;opacity:0}
+.top .logo{font:400 1.9rem/1 var(--display);margin-right:auto}
+.top nav{display:flex;gap:22px;font-size:.92rem}
+.top.inverse{color:#fff}
+@media(max-width:560px){.top nav a:not(:last-child){display:none}}
+
+/* ---------- Entrada ---------- */
+#inicio .stage{position:relative;height:100vh;height:100svh;overflow:hidden;background:var(--bg)}
+@media(pointer:fine){#inicio .stage{cursor:none}}
+
+.name{margin:0;font:400 clamp(4.5rem,14vw,15rem)/.86 var(--display);letter-spacing:-.025em}
+.name .w{position:absolute;display:block;overflow:hidden;padding-bottom:.06em}
+.name .w2{font-style:italic}
+.name .w > span{display:block}
+.name .w1{top:calc(64px + 2vh);left:var(--gutter)}
+.name .w2{bottom:4vh;right:var(--gutter)}
+
+.role{position:absolute;left:var(--gutter);bottom:calc(4vh + .4rem);margin:0;font-size:.95rem;line-height:1.35;color:var(--muted)}
+.role strong{display:block;color:var(--ink);font-weight:500}
+.hint{position:absolute;left:50%;top:calc(50% + var(--fh,30vh) / 2 + 18px);transform:translateX(-50%);font-size:.82rem;color:var(--muted);letter-spacing:.04em;white-space:nowrap}
+.hint i{display:inline-block;font-style:normal;animation:bob 1.6s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(4px)}}
+
+/* El visor: la "pantalla de la cámara" con el video adentro */
+.frame{position:absolute;left:50%;top:50%;z-index:2;
+  width:min(36vw,64vh);aspect-ratio:16/9;
+  background:#151515;overflow:hidden;container-type:size}
+.frame video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.frame .shade{position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(to bottom,rgba(0,0,0,.35),transparent 22%,transparent 78%,rgba(0,0,0,.3))}
+.frame .fallback{position:absolute;inset:0;display:none;place-items:center;color:#bbb;font:500 .8rem/1.4 var(--mono);text-align:center;padding:1rem;
+  background:linear-gradient(135deg,#2a2a2a,#101010)}
+.frame.no-video .fallback{display:grid}
+
+/* --hdr: espacio para el menú cuando el visor llena la pantalla */
+.hud{position:absolute;inset:0;pointer-events:none;color:#fff;font:500 clamp(9px,2.1cqw,15px)/1 var(--mono);letter-spacing:.06em;
+  --in:clamp(10px,3.4cqw,30px);--hdr:0px}
+.hud > *{position:absolute;text-shadow:0 1px 6px rgba(0,0,0,.35)}
+.hud .rec{top:calc(var(--in) + var(--hdr));left:var(--in);display:flex;align-items:center;gap:.55em}
+.hud .rec i{width:.75em;height:.75em;border-radius:50%;background:var(--rec);box-shadow:0 0 8px rgba(224,50,43,.7)}
+.hud .rec.on i{animation:blink 1s steps(1) infinite}
+.hud .rec:not(.on) i{background:#fff;opacity:.6;box-shadow:none}
+@keyframes blink{50%{opacity:0}}
+.hud .tc{top:calc(var(--in) + var(--hdr));right:var(--in);font-variant-numeric:tabular-nums}
+.hud .fmt{bottom:var(--in);left:var(--in);opacity:.85}
+.hud .bat{bottom:var(--in);right:var(--in);display:flex;align-items:center;gap:2px}
+.hud .bat b{display:block;width:1.9em;height:.95em;border:1.5px solid #fff;border-radius:2px;padding:1.5px;display:flex;gap:1.5px}
+.hud .bat b span{flex:1;background:#fff}
+.hud .bat b span:last-child{opacity:.25}
+.hud .bat::after{content:"";width:2px;height:.4em;background:#fff;border-radius:0 1px 1px 0}
+/* Esquinas del visor */
+.hud .c{--s:clamp(12px,4.2cqw,38px);width:var(--s);height:var(--s);border:0 solid #fff;opacity:.95}
+.hud .c.tl{top:calc(var(--in) * 2.4 + var(--hdr));left:var(--in);border-top-width:2px;border-left-width:2px}
+.hud .c.tr{top:calc(var(--in) * 2.4 + var(--hdr));right:var(--in);border-top-width:2px;border-right-width:2px}
+.hud .c.bl{bottom:calc(var(--in) * 2.4);left:var(--in);border-bottom-width:2px;border-left-width:2px}
+.hud .c.br{bottom:calc(var(--in) * 2.4);right:var(--in);border-bottom-width:2px;border-right-width:2px}
+
+/* Texto final, encima del video ya en pantalla completa */
+.caption{position:absolute;z-index:3;left:var(--gutter);right:var(--gutter);bottom:calc(5vh + env(safe-area-inset-bottom,0px));color:#fff;opacity:0;pointer-events:none}
+.caption h2{margin:0;font:400 clamp(2.6rem,6.4vw,5.8rem)/.95 var(--display);letter-spacing:-.02em}
+.caption h2 span{white-space:nowrap}
+.caption h2 span + span::before{content:" · "}
+.caption p{margin:.8rem 0 0;font-size:.95rem;opacity:.85}
+@media (orientation:portrait){.caption h2 span{display:block}.caption h2 span + span::before{content:none}}
+
+/* Cuadro de enfoque: reemplaza la "luz que sigue al cursor" del código del amigo */
+.focus{position:absolute;z-index:4;left:0;top:0;width:68px;height:50px;margin:-25px 0 0 -34px;pointer-events:none;opacity:0;color:var(--ink);
+  --l:11px;--t:1.5px;
+  background:
+    linear-gradient(currentColor,currentColor) left top/var(--l) var(--t),
+    linear-gradient(currentColor,currentColor) left top/var(--t) var(--l),
+    linear-gradient(currentColor,currentColor) right top/var(--l) var(--t),
+    linear-gradient(currentColor,currentColor) right top/var(--t) var(--l),
+    linear-gradient(currentColor,currentColor) left bottom/var(--l) var(--t),
+    linear-gradient(currentColor,currentColor) left bottom/var(--t) var(--l),
+    linear-gradient(currentColor,currentColor) right bottom/var(--l) var(--t),
+    linear-gradient(currentColor,currentColor) right bottom/var(--t) var(--l);
+  background-repeat:no-repeat;transition:color .2s}
+.focus.over{color:#fff}
+.focus.locked{color:#fff}
+.focus:not(.over).locked{color:var(--ink)}
+
+/* Celular / pantalla vertical: visor vertical y el texto se acomoda */
+@media (orientation:portrait){
+  .name{font-size:22vw}
+  .frame{width:min(56vw,25.9vh);aspect-ratio:9/16}
+  .role{bottom:auto;top:calc(64px + 2vh + 22vw * .92 + 12px)}
+  .hint{top:auto;bottom:calc(10px + env(safe-area-inset-bottom,0px))}
+  .name .w2{bottom:calc(4vh + 22px)}
+}
+
+/* ---------- Lo que sigue (solo para ver la transición) ---------- */
+#trabajos{position:relative;z-index:1;background:var(--bg);padding:96px var(--gutter) 120px}
+#trabajos .kicker{font:500 .8rem/1 var(--mono);letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+#trabajos h2{font:400 clamp(3rem,10vw,7rem)/.9 var(--display);letter-spacing:-.02em;margin:.6rem 0 2rem}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.cards div{aspect-ratio:4/5;background:var(--soft);display:grid;place-items:end start;padding:14px;font-size:.85rem;color:var(--muted)}
+.note{margin-top:2.5rem;color:var(--muted);font-size:.9rem;max-width:52ch}
+
+/* ---------- Reducir movimiento: todo quieto ---------- */
+@media (prefers-reduced-motion:reduce){
+  #loader span,.hint i,.hud .rec.on i{animation:none}
+  #inicio .stage{cursor:auto}
+}
+</style>
+</head>
+<body>
+
+<div id="loader" aria-hidden="true"><span>E</span></div>
+
+<header class="top" id="top">
+  <a class="logo" href="#inicio" aria-label="Emanuel Fonseca, inicio">E</a>
+  <nav aria-label="Principal">
+    <a href="#trabajos">Trabajos</a>
+    <a href="#trabajos">Sobre él</a>
+    <a href="#trabajos">Contacto</a>
+  </nav>
+</header>
+
+<main>
+  <section id="inicio" aria-label="Inicio">
+    <div class="stage" id="stage">
+      <h1 class="name" aria-label="Emanuel Fonseca">
+        <span class="w w1" aria-hidden="true"><span>Emanuel</span></span>
+        <span class="w w2" aria-hidden="true"><span>Fonseca</span></span>
+      </h1>
+
+      <p class="role" id="role"><strong>Video y producción audiovisual</strong>Bogotá, Colombia</p>
+
+      <div class="frame" id="frame">
+        <video id="intro" muted loop playsinline preload="auto" aria-hidden="true">
+          <source src="video-prueba.mp4" type="video/mp4">
+          <source src="https://assets.mixkit.co/videos/40584/40584-720.mp4" type="video/mp4">
+        </video>
+        <div class="fallback">Aquí va el video de entrada de Emanuel</div>
+        <div class="shade"></div>
+        <div class="hud" id="hud" aria-hidden="true">
+          <span class="rec" id="rec"><i></i><em id="recTxt" style="font-style:normal">STBY</em></span>
+          <span class="tc" id="tc">00:00:00:00</span>
+          <span class="fmt">4K&nbsp;&nbsp;24p</span>
+          <span class="bat"><b><span></span><span></span><span></span><span></span></b></span>
+          <span class="c tl"></span><span class="c tr"></span><span class="c bl"></span><span class="c br"></span>
+        </div>
+      </div>
+
+      <div class="caption" id="caption">
+        <h2><span>Bodas</span><span>15 años</span><span>Eventos</span></h2>
+        <p>Historias en video, contadas como se vivieron.</p>
+      </div>
+
+      <div class="hint" id="hint">Ver trabajos <i>↓</i></div>
+      <div class="focus" id="focus" aria-hidden="true"></div>
+    </div>
+  </section>
+
+  <section id="trabajos">
+    <div class="kicker">01 — Galería</div>
+    <h2>Bodas</h2>
+    <div class="cards"><div>Video 1</div><div>Video 2</div><div>Video 3</div><div>Video 4</div></div>
+    <p class="note">Prototipo: solo la entrada. Las galerías de aquí para abajo son de relleno para ver cómo se pasa de una parte a la otra.</p>
+  </section>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const stage = $("stage"), frame = $("frame"), video = $("intro"), focusBox = $("focus");
+const top_ = $("top"), tc = $("tc"), rec = $("rec"), recTxt = $("recTxt");
+const quiet = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const finePointer = matchMedia("(pointer: fine)").matches;
+
+if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+scrollTo(0, 0);
+gsap.registerPlugin(ScrollTrigger);
+ScrollTrigger.config({ ignoreMobileResize: true });
+
+/* Si no carga ningún video, se ve un relleno en vez de un cuadro negro */
+const sources = video.querySelectorAll("source");
+sources[sources.length - 1].addEventListener("error", () => frame.classList.add("no-video"));
+
+/* Tamaño inicial del visor (horizontal en computador, vertical en celular) */
+function startSize() {
+  const vw = innerWidth, vh = innerHeight;
+  if (vh > vw) { const w = Math.min(vw * .56, vh * .259); return { w, h: w * 16 / 9 }; }
+  const w = Math.min(vw * .36, vh * .64); return { w, h: w * 9 / 16 };
+}
+gsap.set(frame, { xPercent: -50, yPercent: -50, width: () => startSize().w, height: () => startSize().h });
+const setFH = () => stage.style.setProperty("--fh", startSize().h + "px");   // para ubicar "Ver trabajos" debajo del visor
+setFH(); ScrollTrigger.addEventListener("refreshInit", setFH);
+
+/* Desplazamiento suave */
+let lenis = null;
+if (!quiet) {
+  lenis = new Lenis({ lerp: .09 });
+  lenis.stop();
+  lenis.on("scroll", ScrollTrigger.update);
+  gsap.ticker.add(t => lenis.raf(t * 1000));
+  gsap.ticker.lagSmoothing(0);
+}
+
+/* Contador de tiempo (24 cuadros por segundo). Corre más rápido mientras se baja. */
+let running = false, secs = 0, speed = 1, lastY = scrollY, lastTxt = "";
+const FPS = 24, pad = n => String(n).padStart(2, "0");
+function drawTC() {
+  const f = Math.floor(secs * FPS);
+  const txt = [Math.floor(f / (FPS * 3600)), Math.floor(f / (FPS * 60)) % 60, Math.floor(f / FPS) % 60, f % FPS].map(pad).join(":");
+  if (txt !== lastTxt) { tc.textContent = txt; lastTxt = txt; }
+}
+if (!quiet) gsap.ticker.add((time, dt) => {
+  const y = scrollY, v = Math.abs(y - lastY) / Math.max(dt, 1); lastY = y;   // píxeles por milisegundo
+  speed += ((1 + Math.min(v * 22, 48)) - speed) * .1;
+  if (running) { secs += dt / 1000 * speed; drawTC(); }
+});
+
+/* Video: solo corre cuando está a la vista */
+if (!quiet) {
+  new IntersectionObserver(([e]) => { e.isIntersecting ? video.play().catch(() => {}) : video.pause(); }, { threshold: .05 }).observe(frame);
+}
+
+/* ---------- Al bajar: el visor crece hasta llenar la pantalla ---------- */
+function buildScroll() {
+  const tl = gsap.timeline({
+    defaults: { ease: "none" },
+    scrollTrigger: {
+      trigger: "#inicio", start: "top top", end: () => "+=" + innerHeight * 1.5,
+      pin: stage, scrub: true, invalidateOnRefresh: true,
+      onUpdate: setHeaderColor
+    }
+  });
+  tl.fromTo(frame, { width: () => startSize().w, height: () => startSize().h },
+                   { width: () => innerWidth, height: () => innerHeight, ease: "power2.inOut", duration: .72 }, 0)
+    .fromTo("#hud", { "--hdr": "0px" }, { "--hdr": "48px", ease: "power2.inOut", duration: .72 }, 0)
+    .to(".w1", { xPercent: -12, yPercent: -55, duration: .6, ease: "power1.in" }, 0)
+    .to(".w2", { xPercent: 12, yPercent: 55, duration: .6, ease: "power1.in" }, 0)
+    .to(["#role", "#hint"], { autoAlpha: 0, duration: .12 }, 0)
+    .to("#hud .c", { opacity: 0, duration: .12 }, .74)
+    .to(["#hud .fmt", "#hud .bat"], { opacity: 0, duration: .12 }, .78)
+    .fromTo("#caption", { autoAlpha: 0, y: 30 }, { autoAlpha: 1, y: 0, duration: .16, ease: "power2.out" }, .8)
+    .to({}, { duration: .1 });   // un respiro al final antes de soltar la pantalla
+}
+
+/* Menú: letras blancas mientras el video está detrás de él */
+function setHeaderColor() {
+  const r = frame.getBoundingClientRect();
+  top_.classList.toggle("inverse", r.top < 30 && r.bottom > 30 && r.left < 40);
+}
+addEventListener("scroll", setHeaderColor, { passive: true });
+
+/* ---------- Cuadro de enfoque que sigue al cursor ---------- */
+function setupFocus() {
+  if (quiet) return;
+  const mx = gsap.quickTo(focusBox, "x", { duration: .28, ease: "power3.out" });
+  const my = gsap.quickTo(focusBox, "y", { duration: .28, ease: "power3.out" });
+  let idle, lastLock = { x: -999, y: -999 }, pos = { x: 0, y: 0 };
+
+  const overVideo = () => {
+    const s = stage.getBoundingClientRect(), r = frame.getBoundingClientRect();
+    const x = pos.x + s.left, y = pos.y + s.top;
+    return x > r.left && x < r.right && y > r.top && y < r.bottom;
+  };
+  const lock = () => {
+    if (Math.hypot(pos.x - lastLock.x, pos.y - lastLock.y) < 40) return;
+    lastLock = { ...pos };
+    const inside = overVideo();
+    focusBox.classList.add("locked");
+    gsap.timeline()
+      .fromTo(focusBox, { scale: 1.35 }, { scale: 1, duration: .32, ease: "power3.out" })
+      .to(focusBox, { opacity: .35, duration: .06, repeat: 3, yoyo: true }, "<.1");
+    if (inside) gsap.fromTo(video, { filter: "blur(0px)" }, { keyframes: [{ filter: "blur(2.5px)", duration: .14 }, { filter: "blur(0px)", duration: .26 }], ease: "power1.inOut" });
+  };
+  const move = (x, y) => {
+    pos = { x, y }; mx(x); my(y);
+    focusBox.classList.toggle("over", overVideo());
+    focusBox.classList.remove("locked");
+    clearTimeout(idle); idle = setTimeout(lock, 240);
+  };
+
+  if (finePointer) {
+    stage.addEventListener("pointermove", e => {
+      const s = stage.getBoundingClientRect();
+      move(e.clientX - s.left, e.clientY - s.top);
+      gsap.to(focusBox, { opacity: 1, duration: .2, overwrite: "auto" });
+    });
+    stage.addEventListener("pointerleave", () => gsap.to(focusBox, { opacity: 0, duration: .2 }));
+    addEventListener("scroll", () => focusBox.classList.toggle("over", overVideo()), { passive: true });
+  } else {
+    /* En celular: aparece donde se toca la pantalla y se desvanece */
+    stage.addEventListener("pointerdown", e => {
+      const s = stage.getBoundingClientRect(), x = e.clientX - s.left, y = e.clientY - s.top;
+      gsap.set(focusBox, { x, y }); pos = { x, y }; lastLock = { x: -999, y: -999 };
+      focusBox.classList.toggle("over", overVideo());
+      gsap.killTweensOf(focusBox, "opacity");
+      gsap.set(focusBox, { opacity: 1 }); lock();
+      gsap.to(focusBox, { opacity: 0, duration: .4, delay: 1.1 });
+    });
+  }
+}
+
+/* ---------- Entrada al terminar de cargar ---------- */
+function intro() {
+  $("loader").classList.add("done");
+  if (quiet) {
+    gsap.set(".top", { opacity: 1 });
+    rec.classList.add("on"); recTxt.textContent = "REC";
+    return;
+  }
+  const tl = gsap.timeline({ defaults: { ease: "expo.out" } });
+  tl.from(".name .w > span", { yPercent: 110, duration: 1.2, stagger: .1 }, .15)
+    .fromTo(frame, { clipPath: "inset(50% 0% 50% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 1, ease: "power3.inOut" }, .35)
+    .from("#hud", { opacity: 0, duration: .5, ease: "power1.out" }, 1.1)
+    .from(["#role", "#hint"], { opacity: 0, y: 14, duration: .9 }, .9)
+    .to(".top", { opacity: 1, duration: .8, ease: "power1.out" }, .9)
+    .add(() => { rec.classList.add("on"); recTxt.textContent = "REC"; running = true; lenis && lenis.start(); }, 1.7);
+}
+
+if (!quiet) buildScroll();
+setupFocus();
+document.fonts && document.fonts.ready.then(() => ScrollTrigger.refresh());
+
+/* Espera a que el video tenga imagen (máximo 2,5 s) y a que la "E" se vea al menos un momento */
+const minWait = new Promise(r => setTimeout(r, 900));
+const videoReady = new Promise(r => {
+  if (video.readyState >= 2) return r();
+  video.addEventListener("loadeddata", r, { once: true });
+  setTimeout(r, 2500);
+});
+Promise.all([minWait, videoReady]).then(() => {
+  if (quiet) { video.pause(); }
+  intro();
+});
+</script>
+<script src="catalogo.js"></script>
+</body>
+</html>

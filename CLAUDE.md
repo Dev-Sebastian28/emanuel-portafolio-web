@@ -167,6 +167,31 @@ se pueda entregar a otro desarrollador sin problema. Nada raro.
 - La sección "Film photography" del HTML del amigo se quitó porque era de la plantilla
   de conciertos; sigue en `respaldo/`.
 
+## Entrada (animación de inicio)
+
+- **Elegida (10 nov 2026): "visor de grabación".** El nombre en grande, y en el centro un
+  recuadro con el video de entrada, como la pantalla de una cámara: esquinas, "REC" que
+  titila y un contador de tiempo. Al bajar, el recuadro crece hasta llenar la pantalla.
+  El cuadro de enfoque de la cámara sigue al cursor; reemplaza la luz del código del amigo.
+- **Catálogo de entradas para comparar:** `prototipos/index.html`. Se abre con
+  `node prototipos/servidor.mjs` (http://localhost:4321) o con la configuración
+  "prototipos" de `.claude/launch.json`. Usan clips gratis de Mixkit; si se pone un
+  `video-prueba.mp4` en esa carpeta, usan ese. Ninguna está todavía en
+  `src/components/Entrada.tsx`.
+  1. `entrada-visor.html`: visor de grabación (la elegida por ahora).
+  2. `entrada-ventana.html`: el video se ve a través de las letras del nombre y al bajar
+     se entra por la "E".
+  3. `entrada-revelado.html`: la página arranca en blanco y la imagen aparece como una
+     foto en el revelado; con el cursor se revela más rápido.
+  4. `entrada-contactos.html`: hoja de contactos con fotos de varios eventos, una marcada
+     en rojo; al bajar se entra a esa, que es un video. El cursor es una lupa.
+  - Para sumar otra opción: crear el archivo y agregarlo en `catalogo.js` e `index.html`.
+- **Descartada: cámara que se desarma por piezas.** La referencia ya entra por el lente
+  de una cámara ("A través del lente"), así que se vería copiada. Además habla del equipo
+  y no del trabajo, y un modelo 3D pesa mucho en celular.
+- No hay que grabar nada nuevo: el video de entrada sale del material de bodas que
+  Emanuel ya tiene.
+
 ## Estado
 
 - [x] Revisión de la referencia y preguntas al cliente (WhatsApp, 16 preguntas)

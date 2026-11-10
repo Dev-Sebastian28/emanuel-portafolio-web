@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Prototipo — Entrada "revelado"</title>
+<!--
+  PROTOTIPO 3 del catálogo de entradas. La página empieza en blanco, como papel fotográfico,
+  y el video va apareciendo como una foto en el revelado: primero las sombras, después los
+  tonos y al final el color. Con el cursor se "frota" para que revele más rápido.
+  Video de prueba: "video-prueba.mp4" en esta carpeta si existe; si no, un clip gratis de Mixkit.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@500&family=Instrument+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.css">
+<style>
+:root{
+  --bg:#fff; --ink:#0b0b0b; --muted:#6b6b6b; --line:#e6e6e3; --soft:#f3f3f1;
+  --display:'Instrument Serif','Times New Roman',serif;
+  --body:'Instrument Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+  --gutter:20px;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink)}
+body{font:400 1rem/1.5 var(--body);-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+
+#loader{position:fixed;inset:0;z-index:100;display:grid;place-items:center;background:var(--bg);transition:opacity .6s,visibility .6s}
+#loader.done{opacity:0;visibility:hidden}
+#loader span{font:400 7rem/1 var(--display);animation:pulse 1s ease-in-out infinite alternate}
+@keyframes pulse{from{opacity:.2;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
+
+.top{position:fixed;inset:0 0 auto;z-index:20;display:flex;align-items:center;gap:24px;height:60px;padding:0 var(--gutter);
+  padding-top:env(safe-area-inset-top,0px);color:var(--ink);transition:color .35s;opacity:0}
+.top .logo{font:400 1.9rem/1 var(--display);margin-right:auto}
+.top nav{display:flex;gap:22px;font-size:.92rem}
+.top.inverse{color:#fff}
+@media(max-width:560px){.top nav a:not(:last-child){display:none}}
+
+/* ---------- Entrada ---------- */
+#inicio .stage{position:relative;height:100vh;height:100svh;overflow:hidden;background:#fff}
+.photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;
+  filter:grayscale(1) sepia(.3) brightness(3)}
+/* El "papel sin revelar": una capa blanca. Alrededor del cursor es más transparente. */
+.veil{position:absolute;inset:0;background:#fff;opacity:1;pointer-events:none;
+  --mx:50%;--my:50%;--mr:1px;
+  -webkit-mask-image:radial-gradient(circle var(--mr) at var(--mx) var(--my),rgba(0,0,0,.15) 0%,rgba(0,0,0,.55) 55%,#000 100%);
+          mask-image:radial-gradient(circle var(--mr) at var(--mx) var(--my),rgba(0,0,0,.15) 0%,rgba(0,0,0,.55) 55%,#000 100%)}
+/* Grano de la foto */
+.grain{position:absolute;inset:-50%;pointer-events:none;opacity:.09;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation:grano .6s steps(4) infinite}
+@keyframes grano{0%{transform:translate(0,0)}25%{transform:translate(-4%,3%)}50%{transform:translate(3%,-2%)}75%{transform:translate(-2%,-4%)}100%{transform:translate(0,0)}}
+
+.head{position:absolute;left:var(--gutter);right:var(--gutter);bottom:calc(5vh + env(safe-area-inset-bottom,0px))}
+.role{margin:0 0 1.2rem;font-size:.75rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.name{margin:0;font:400 min(17vw,30vh)/.86 var(--display);letter-spacing:-.03em}
+.name .w{display:block;overflow:hidden;padding-bottom:.06em}
+.name .w > span{display:block}
+.name em{font-style:italic}
+
+.side{position:absolute;right:var(--gutter);bottom:calc(5vh + env(safe-area-inset-bottom,0px));text-align:right;font-size:.82rem;color:var(--muted);letter-spacing:.04em}
+.meter{font:500 .72rem/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink);margin-bottom:.9rem;font-variant-numeric:tabular-nums}
+.meter b{display:block;width:120px;height:1px;background:var(--line);margin:.6rem 0 0 auto;position:relative;overflow:hidden}
+.meter b i{position:absolute;inset:0;background:var(--ink);transform-origin:left;transform:scaleX(0)}
+.hint i{display:inline-block;font-style:normal;animation:bob 1.6s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(4px)}}
+
+.caption{position:absolute;z-index:3;left:var(--gutter);right:var(--gutter);bottom:calc(5vh + env(safe-area-inset-bottom,0px));color:#fff;opacity:0;pointer-events:none}
+.caption h2{margin:0;font:400 clamp(2.6rem,6.4vw,5.8rem)/.95 var(--display);letter-spacing:-.02em}
+.caption h2 span{white-space:nowrap}
+.caption h2 span + span::before{content:" · "}
+.caption p{margin:.8rem 0 0;font-size:.95rem;opacity:.85}
+
+@media (orientation:portrait){
+  .name{font-size:22vw}
+  .side{bottom:auto;top:calc(60px + 3vh);left:var(--gutter);right:auto;text-align:left}
+  .meter b{margin-left:0}
+  .caption h2 span{display:block}.caption h2 span + span::before{content:none}
+}
+
+#trabajos{position:relative;z-index:1;background:var(--bg);padding:96px var(--gutter) 120px}
+#trabajos .kicker{font:500 .8rem/1 var(--mono);letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+#trabajos h2{font:400 clamp(3rem,10vw,7rem)/.9 var(--display);letter-spacing:-.02em;margin:.6rem 0 2rem}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.cards div{aspect-ratio:4/5;background:var(--soft);display:grid;place-items:end start;padding:14px;font-size:.85rem;color:var(--muted)}
+.note{margin-top:2.5rem;color:var(--muted);font-size:.9rem;max-width:52ch}
+
+@media (prefers-reduced-motion:reduce){#loader span,.hint i,.grain{animation:none}}
+</style>
+</head>
+<body>
+
+<div id="loader" aria-hidden="true"><span>E</span></div>
+
+<header class="top" id="top">
+  <a class="logo" href="#inicio" aria-label="Emanuel Fonseca, inicio">E</a>
+  <nav aria-label="Principal">
+    <a href="#trabajos">Trabajos</a>
+    <a href="#trabajos">Sobre él</a>
+    <a href="#trabajos">Contacto</a>
+  </nav>
+</header>
+
+<main>
+  <section id="inicio" aria-label="Inicio">
+    <div class="stage" id="stage">
+      <video id="intro" class="photo" muted loop playsinline preload="auto" aria-hidden="true">
+        <source src="video-prueba.mp4" type="video/mp4">
+        <source src="https://assets.mixkit.co/videos/40584/40584-720.mp4" type="video/mp4">
+      </video>
+      <div class="veil" id="veil"></div>
+      <div class="grain" id="grain" aria-hidden="true"></div>
+
+      <div class="head" id="head">
+        <p class="role">Video y producción audiovisual — Bogotá</p>
+        <h1 class="name" aria-label="Emanuel Fonseca">
+          <span class="w" aria-hidden="true"><span>Emanuel</span></span>
+          <span class="w" aria-hidden="true"><span><em>Fonseca</em></span></span>
+        </h1>
+      </div>
+
+      <div class="side" id="side">
+        <div class="meter" id="meter" aria-hidden="true"><span id="pct">Revelando 0%</span><b><i id="bar"></i></b></div>
+        <div class="hint" id="hint">Ver trabajos <i>↓</i></div>
+      </div>
+
+      <div class="caption" id="caption">
+        <h2><span>Bodas</span><span>15 años</span><span>Eventos</span></h2>
+        <p>Historias en video, contadas como se vivieron.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="trabajos">
+    <div class="kicker">01 — Galería</div>
+    <h2>Bodas</h2>
+    <div class="cards"><div>Video 1</div><div>Video 2</div><div>Video 3</div><div>Video 4</div></div>
+    <p class="note">Prototipo: solo la entrada. Las galerías de aquí para abajo son de relleno para ver cómo se pasa de una parte a la otra.</p>
+  </section>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const stage = $("stage"), video = $("intro"), veil = $("veil"), grain = $("grain"), top_ = $("top");
+const pct = $("pct"), bar = $("bar");
+const quiet = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const finePointer = matchMedia("(pointer: fine)").matches;
+
+if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+scrollTo(0, 0);
+gsap.registerPlugin(ScrollTrigger);
+ScrollTrigger.config({ ignoreMobileResize: true });
+
+let lenis = null;
+if (!quiet) {
+  lenis = new Lenis({ lerp: .09 });
+  lenis.stop();
+  lenis.on("scroll", ScrollTrigger.update);
+  gsap.ticker.add(t => lenis.raf(t * 1000));
+  gsap.ticker.lagSmoothing(0);
+  new IntersectionObserver(([e]) => { e.isIntersecting ? video.play().catch(() => {}) : video.pause(); }, { threshold: .05 }).observe(stage);
+}
+
+/* Qué tan revelada está la foto.
+   inicio: el papel empieza a mostrar algo solo (al cargar).  rev: lo que se revela al bajar (0 a 1). */
+const estado = { inicio: 1, rev: 0 };
+const tramo = (v, a, b) => Math.min(1, Math.max(0, (v - a) / (b - a)));
+let ultimoTxt = "";
+function pintar() {
+  const r = estado.rev;
+  const brillo = 3 - 2 * tramo(r, 0, .8);              // primero solo se ven las sombras
+  const gris = 1 - tramo(r, .35, .85);                  // el color llega al final
+  const sepia = .3 * (1 - tramo(r, .5, .9));
+  video.style.filter = `grayscale(${gris.toFixed(3)}) sepia(${sepia.toFixed(3)}) brightness(${brillo.toFixed(3)})`;
+  veil.style.opacity = (estado.inicio * (1 - Math.pow(tramo(r, 0, .75), 1.5))).toFixed(3);
+  grain.style.opacity = (.09 * (1 - tramo(r, .85, 1))).toFixed(3);
+  const p = Math.round(r * 100), txt = p >= 100 ? "Revelada 100%" : `Revelando ${p}%`;
+  if (txt !== ultimoTxt) { pct.textContent = txt; ultimoTxt = txt; }
+  bar.style.transform = `scaleX(${r.toFixed(3)})`;
+}
+pintar();
+
+let tl = null;
+function buildScroll() {
+  tl = gsap.timeline({
+    defaults: { ease: "none" },
+    scrollTrigger: {
+      trigger: "#inicio", start: "top top", end: () => "+=" + innerHeight * 1.6,
+      pin: stage, scrub: true, invalidateOnRefresh: true, onUpdate: setHeaderColor
+    }
+  });
+  tl.to(estado, { rev: 1, duration: .82, onUpdate: pintar }, 0)
+    .to("#hint", { autoAlpha: 0, duration: .08 }, 0)
+    .to("#head", { autoAlpha: 0, y: -30, duration: .2, ease: "power1.in" }, .3)
+    .to("#meter", { autoAlpha: 0, duration: .08 }, .84)
+    .fromTo("#caption", { autoAlpha: 0, y: 30 }, { autoAlpha: 1, y: 0, duration: .14, ease: "power2.out" }, .84)
+    .to({}, { duration: .1 });
+}
+
+function setHeaderColor() {
+  const oscura = estado.rev > .55;
+  top_.classList.toggle("inverse", oscura && stage.getBoundingClientRect().bottom > 30);
+}
+addEventListener("scroll", setHeaderColor, { passive: true });
+
+/* "Frotar" la foto con el cursor: alrededor de él se revela más rápido */
+if (!quiet && finePointer) {
+  const pos = { x: innerWidth / 2, y: innerHeight / 2, r: 1 };
+  const aplicar = () => {
+    veil.style.setProperty("--mx", pos.x + "px");
+    veil.style.setProperty("--my", pos.y + "px");
+    veil.style.setProperty("--mr", pos.r + "px");
+  };
+  const mx = gsap.quickTo(pos, "x", { duration: .5, ease: "power3.out", onUpdate: aplicar });
+  const my = gsap.quickTo(pos, "y", { duration: .5, ease: "power3.out", onUpdate: aplicar });
+  stage.addEventListener("pointermove", e => {
+    const s = stage.getBoundingClientRect();
+    mx(e.clientX - s.left); my(e.clientY - s.top);
+    gsap.to(pos, { r: Math.min(260, innerWidth * .2), duration: .6, ease: "power2.out", overwrite: "auto", onUpdate: aplicar });
+  });
+  stage.addEventListener("pointerleave", () => gsap.to(pos, { r: 1, duration: .8, ease: "power2.inOut", onUpdate: aplicar }));
+}
+
+function intro() {
+  $("loader").classList.add("done");
+  if (quiet) {
+    gsap.set(".top", { opacity: 1 });
+    estado.inicio = .6; estado.rev = .25; pintar();
+    return;
+  }
+  gsap.timeline({ defaults: { ease: "expo.out" } })
+    .from(".name .w > span", { yPercent: 110, duration: 1.3, stagger: .12 }, .15)
+    .from([".role", "#side"], { opacity: 0, y: 14, duration: .9 }, .6)
+    .to(".top", { opacity: 1, duration: .8, ease: "power1.out" }, .8)
+    // La foto empieza a aparecer sola, despacio, para invitar a bajar
+    .to(estado, { inicio: .84, duration: 4, ease: "power1.out", onUpdate: pintar }, .4)
+    .add(() => lenis && lenis.start(), 1.3);
+}
+
+if (!quiet) buildScroll();
+document.fonts && document.fonts.ready.then(() => ScrollTrigger.refresh());
+
+const minWait = new Promise(r => setTimeout(r, 900));
+const videoReady = new Promise(r => {
+  if (video.readyState >= 2) return r();
+  video.addEventListener("loadeddata", r, { once: true });
+  setTimeout(r, 2500);
+});
+Promise.all([minWait, videoReady]).then(() => { if (quiet) video.pause(); intro(); });
+</script>
+<script src="catalogo.js"></script>
+</body>
+</html>
