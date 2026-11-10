@@ -198,7 +198,9 @@ se pueda entregar a otro desarrollador sin problema. Nada raro.
 - [x] Carpeta del proyecto creada
 - [x] Guardar el código HTML del amigo tal cual, como punto de partida
 - [x] Crear el repositorio local con esa primera versión
-- [ ] Subir el repositorio a GitHub privado (Sebastian debe iniciar sesión primero)
+- [x] Subir el repositorio a GitHub privado:
+      https://github.com/Dev-Sebastian28/emanuel-portafolio-web (cuenta Dev-Sebastian28)
+- [ ] Invitar al amigo al repositorio (falta su usuario de GitHub)
 - [x] Proyecto Next.js + Payload con la estructura del amigo y el estilo blanco
       minimalista, en la rama `feat/proyecto-nextjs`
 - [x] Panel en español: trabajos, categorías, archivos y datos de la página
