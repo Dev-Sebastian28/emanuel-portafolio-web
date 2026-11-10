@@ -1,8 +1,41 @@
 # Emanuel — Portafolio web
 
-Portafolio premium para Emanuel, fotógrafo y creador de contenido. Se trabaja en código
-(no Webflow, Framer ni constructores visuales). Lo construyen Sebastian y su amigo
-(usuario de Live Share "Ore0999"), que hizo la primera versión en HTML.
+Portafolio premium para Emanuel Fonseca, videógrafo y productor audiovisual. Se trabaja
+en código (no Webflow, Framer ni constructores visuales). Lo construyen Sebastian y su
+amigo (usuario de Live Share "Ore0999"), que hizo la primera versión en HTML.
+
+## El cliente
+
+- **Nombre:** Emanuel Fonseca. Bogotá, Colombia.
+- **Qué hace:** video y producción audiovisual, con experiencia en bodas.
+- **Categorías de trabajo (según el código del amigo):** Bodas, 15 años, Eventos. Hay
+  una cuarta categoría vacía, por definir.
+- **Contacto:** fftemanuel@gmail.com, Instagram https://www.instagram.com/emanuel.fonsecam/
+- Su público son parejas, familias y organizadores de eventos, no artistas de
+  conciertos. Textos, contacto (WhatsApp) y orden de la página deben pensarse para ellos.
+
+## Código del amigo (respaldo/portafolio-original-amigo.html)
+
+Copia exacta y sin tocar de la primera versión. **No editar este archivo.**
+
+- **Conservar:**
+  - Las secciones: entrada con el nombre en grande, galerías por categoría en
+    carrusel, sobre él con etiquetas, contacto y visor de galería.
+  - La idea de un bloque `CONFIG` con los datos editables; se vuelve el panel de Payload.
+  - Los detalles de accesibilidad: etiquetas, Escape cierra el visor y se respeta
+    "reducir movimiento".
+  - La pantalla de carga con la "E" y la luz que sigue al cursor en la entrada; hay que
+    adaptarlas al estilo blanco.
+- **Corregir:**
+  - Los colores están a medio cambiar: fondo lila grisáceo con letras casi blancas, así
+    que los títulos casi no se leen.
+  - Quedan restos de la plantilla de conciertos: "Fotografía de conciertos", "Artistas",
+    "Film photography", "¿Un show, una gira…?" y textos de relleno en "Acerca de mí".
+  - Solo muestra fotos; no maneja videos.
+  - La categoría "15 AÑOS" se usa como nombre de carpeta, con espacio y Ñ.
+  - El visor muestra la cuadrícula pero no abre una foto en grande.
+  - Faltan tildes: "Videografo", "Produccion", "GALERIA".
+  - Las imágenes no existen todavía; se ven degradados de relleno.
 
 ## Cómo trabajar con Sebastian
 
@@ -95,8 +128,9 @@ se pueda entregar a otro desarrollador sin problema. Nada raro.
 
 - [x] Revisión de la referencia y preguntas al cliente (WhatsApp, 16 preguntas)
 - [x] Carpeta del proyecto creada
-- [ ] Guardar el código HTML del amigo tal cual, como punto de partida
-- [ ] Crear el repositorio en GitHub (Sebastian debe iniciar sesión primero)
+- [x] Guardar el código HTML del amigo tal cual, como punto de partida
+- [x] Crear el repositorio local con esa primera versión
+- [ ] Subir el repositorio a GitHub privado (Sebastian debe iniciar sesión primero)
 - [ ] Pasar el HTML a Next.js sin cambiar cómo se ve
 - [ ] Aplicar el estilo blanco y minimalista
 - [ ] Hacer el panel y las galerías de videos
@@ -106,7 +140,5 @@ se pueda entregar a otro desarrollador sin problema. Nada raro.
 
 - Respuestas del cliente: nombre, logo, tres palabras de estilo, categorías y forma de
   contacto.
-- Código del amigo: Sebastian debe copiarlo desde VS Code (está en el computador del
-  amigo, dentro de Live Share).
 - Al publicar: crear las cuentas de Cloudflare, Render y Neon a nombre del cliente. R2
   pide una tarjeta registrada aunque no cobre mientras no pase del límite gratis.
