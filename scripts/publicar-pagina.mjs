@@ -85,16 +85,18 @@ console.log(`\nPágina armada en ${salida}`)
 
 if (publicar) {
   paso('Subiendo a Cloudflare')
-  correr('npx', [
-    '--yes',
-    'wrangler@4',
-    'deploy',
-    '--name',
-    NOMBRE,
-    '--assets',
-    salida,
-    '--compatibility-date',
-    '2026-11-10',
-  ])
+  // Sin R2, los videos van junto a la página y necesitan rangos-cloudflare.js para el iPhone.
+  const configuracion = {
+    name: NOMBRE,
+    compatibility_date: '2026-11-10',
+    ...(usaR2 ? {} : { main: path.join(raiz, 'scripts/rangos-cloudflare.js') }),
+    assets: {
+      directory: salida,
+      ...(usaR2 ? {} : { binding: 'ASSETS', run_worker_first: ['/api/media/*'] }),
+    },
+  }
+  const archivoConfiguracion = path.join(tmpdir(), 'emanuel-pagina-wrangler.json')
+  writeFileSync(archivoConfiguracion, JSON.stringify(configuracion, null, 2))
+  correr('npx', ['--yes', 'wrangler@4', 'deploy', '--config', archivoConfiguracion])
   console.log(`\nPublicada en ${URL_PUBLICA}`)
 }
