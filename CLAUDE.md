@@ -221,6 +221,41 @@ se pueda entregar a otro desarrollador sin problema. Nada raro.
 - La sección "Film photography" del HTML del amigo se quitó porque era de la plantilla
   de conciertos; sigue en `respaldo/`.
 
+## Publicación (página en Cloudflare, panel en Render)
+
+**Página pública:** https://emanuel-fonseca.portafolioemanuel42.workers.dev, en la cuenta
+de Cloudflare del proyecto, plan gratis.
+- `scripts/publicar-pagina.mjs` la arma como archivos fijos, sin el panel. Usa la última
+  versión guardada en git, no los cambios sin guardar.
+- Lee el contenido de la base que diga `DATABASE_URL`.
+- Con `--publicar`, la sube a Cloudflare.
+- Mientras no se ponga `INDEXAR=1`, le pide a Google que no la muestre.
+- `next.config.ts` la arma así cuando `EXPORTAR=1`.
+
+**Etapa 1 (10 nov 2026, hecha):** publicada con los datos de prueba de la base del
+computador. Las fotos y videos de `/media` van junto a la página.
+`scripts/rangos-cloudflare.js` entrega los videos por pedazos, porque Cloudflare no lo
+hace solo y el iPhone lo necesita para reproducirlos. Para volver a publicarla desde el
+computador: `node scripts/publicar-pagina.mjs --publicar`.
+
+**Etapa 2 (en curso), pedida por Sebastian: página y panel, con datos de prueba.**
+- Panel en Render (`render.yaml`, servicio `emanuel-panel`, rama `feat/proyecto-nextjs`).
+  Al encender aplica las migraciones en Neon.
+- Fotos y videos en R2, en el bucket `emanuel-archivos`. Con `S3_URL_PUBLICA`, la página
+  los pide directo a R2 (`src/payload.config.ts`).
+- Al publicar algo, el panel avisa a `AVISO_PUBLICAR`, un "deploy hook" de Cloudflare
+  (`src/hooks/revalidar.ts`). Cloudflare vuelve a armar la página desde GitHub con los
+  datos de Neon. Guardar un borrador no la vuelve a armar.
+- Los datos de prueba se copian a Neon y R2, para que página y panel muestren lo mismo.
+  Se borran antes de cargar el contenido real.
+- Pasos de Sebastian, porque piden tarjeta, cuentas o claves:
+  1. Activar R2 (pide tarjeta).
+  2. Crear la clave de R2 y pegarla en `.env.produccion`.
+  3. Crear la cuenta de Render y el servicio desde `render.yaml`.
+  4. Conectar el repositorio al Worker `emanuel-fonseca` en Cloudflare y crear el
+     deploy hook.
+- Las claves de la página publicada viven en `.env.produccion`, que no se sube a GitHub.
+
 ## Entrada (animación de inicio)
 
 - **Elegida (10 nov 2026): "visor de grabación".** El nombre en grande, y en el centro un
@@ -286,10 +321,8 @@ se pueda entregar a otro desarrollador sin problema. Nada raro.
   3. La zona: Bogotá y alrededores, solo Bogotá, o toda Colombia.
   4. Si se le escribe al cliente la guía para crear su Perfil de Empresa en Google y
      pedir reseñas.
-- **Definir cómo se publica en dos partes.** Hoy es una sola aplicación de Next.js
-  (página y panel). Para el plan gratis hay que separar la página pública, que va
-  estática a Cloudflare, del panel, que va a Render, y conectar el aviso de "volver a
-  armar" al publicar.
+- **Terminar la etapa 2 de la publicación** (ver "Publicación"): faltan R2, Render y el
+  aviso de Cloudflare.
 - **Actualizar Node.js.** Payload pide la versión 22.23.4 o más nueva; el Mac tiene la
   22.23.2. Funciona, pero sale una advertencia al instalar.
 - **Datos de prueba en la base local.** Hay cuatro trabajos "PRUEBA" en Bodas (tres
