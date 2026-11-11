@@ -1,0 +1,39 @@
+# Panel de Emanuel en Render, plan gratis. La página pública va aparte, en Cloudflare
+# (scripts/publicar-pagina.mjs). Los valores con "sync: false" se llenan en Render al crear
+# el servicio; están en el archivo .env.produccion del computador (no se sube a GitHub).
+services:
+  - type: web
+    name: emanuel-panel
+    runtime: node
+    plan: free
+    # Virginia, la misma región de la base de datos en Neon.
+    region: virginia
+    branch: feat/proyecto-nextjs
+    buildCommand: npm ci --include=dev && npm run build
+    # Antes de encender, pone la base de Neon al día con los cambios de src/migrations.
+    startCommand: npm run migrate && npm start
+    envVars:
+      - key: NODE_VERSION
+        value: '22'
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_TELEMETRY_DISABLED
+        value: '1'
+      - key: DATABASE_URL
+        sync: false
+      - key: PAYLOAD_SECRET
+        sync: false
+      - key: NEXT_PUBLIC_SERVER_URL
+        sync: false
+      - key: S3_BUCKET
+        value: emanuel-archivos
+      - key: S3_ENDPOINT
+        value: https://5cc47ba2be41d43f7afb2d29dfb80f92.r2.cloudflarestorage.com
+      - key: S3_ACCESS_KEY_ID
+        sync: false
+      - key: S3_SECRET_ACCESS_KEY
+        sync: false
+      - key: S3_URL_PUBLICA
+        sync: false
+      - key: AVISO_PUBLICAR
+        sync: false

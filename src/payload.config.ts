@@ -53,7 +53,17 @@ export default buildConfig({
   plugins: usarR2
     ? [
         s3Storage({
-          collections: { media: true },
+          collections: {
+            // Con S3_URL_PUBLICA, las fotos y videos se piden directo a R2 y no al panel. Así los
+            // encuentra la página publicada en Cloudflare, que no tiene panel.
+            media: process.env.S3_URL_PUBLICA
+              ? {
+                  disablePayloadAccessControl: true,
+                  generateFileURL: ({ filename, prefix }) =>
+                    [process.env.S3_URL_PUBLICA, prefix, filename].filter(Boolean).join('/'),
+                }
+              : true,
+          },
           bucket: process.env.S3_BUCKET || '',
           clientUploads: true,
           config: {
