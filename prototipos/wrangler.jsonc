@@ -1,0 +1,7 @@
+// Publicación del catálogo de entradas en Cloudflare (solo los prototipos, no la página real).
+// Para volver a publicar: npx wrangler@4 deploy, desde esta carpeta.
+{
+  "name": "emanuel-entradas",
+  "compatibility_date": "2026-11-10",
+  "assets": { "directory": "." }
+}

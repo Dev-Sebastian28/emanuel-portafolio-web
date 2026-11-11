@@ -57,6 +57,28 @@
   }
 }
 
+/* Carrusel de la selección (src/components/Carrusel.tsx): alto de cada fila, ancho de los
+   trabajos verticales ("angosta") y horizontales ("ancha"), y espacio entre ellos. */
+.carrusel {
+  --alto: clamp(18rem, 108vw, 30rem);
+  --angosta: 44vw;
+  --ancha: 78vw;
+  --separacion: 4vw;
+}
+
+@media (min-width: 768px) {
+  .carrusel {
+    --alto: clamp(24rem, min(84svh, 68vw), 54rem);
+    --angosta: 22.5vw;
+    --ancha: 47vw;
+    --separacion: 2.2vw;
+  }
+}
+
+.carrusel .arrastrando {
+  cursor: grabbing;
+}
+
 /* Luz suave que sigue al cursor en la entrada (idea del diseño original). */
 .luz {
   background: radial-gradient(

@@ -56,6 +56,13 @@ Copia exacta y sin tocar de la primera versión. **No editar este archivo.**
 - **Panel propio** para que él suba su contenido sin depender de nadie.
 - Precio y fecha de entrega: ya cerrados con el cliente.
 - Meta de costos: que la mensualidad sea lo más baja posible, ojalá cero.
+- **Orden de la página (pedido del cliente, 10 nov 2026):**
+  1. Entrada: el visor de grabación (se trabaja en otra sesión).
+  2. Carrusel como el de https://wschupfer.com/new-york/: filas de fotos y videos que se
+     mueven solas.
+  3. Galería de trabajos por categorías.
+  4. Sobre mí.
+  5. Contacto.
 
 **Referencia:** https://juanografoo.com — sirve de inspiración por el nivel (entrada
 animada al bajar, galerías limpias, visor de fotos). **No copiar** su concepto ("a
@@ -134,13 +141,43 @@ se pueda entregar a otro desarrollador sin problema. Nada raro.
    `.env`, que no se sube a GitHub; `.env.example` explica cada variable.
 5. Antes de guardar cambios: `npx tsc --noEmit`, `npm run lint` y `npm run build`.
 
+## Base de datos de la página publicada (Neon)
+
+- **Creada el 10 nov 2026** en la cuenta de Neon del proyecto
+  (portafolioemanuel42@gmail.com, la misma de Cloudflare), organización "Fonseca", plan
+  gratis. Proyecto `emanuel-portafolio` (id `icy-star-33500921`), región Virginia
+  (`aws-us-east-1`), PostgreSQL 18, base `emanuel_portafolio`, rama `main`.
+- **Solo para la página publicada.** El computador sigue con Postgres.app (`.env`).
+  Decisión de Sebastian: su amigo trabaja con su propia base local.
+- **Arrancó limpia:** las tres categorías, los datos de la página y un usuario del panel.
+  Sin trabajos ni archivos; los "PRUEBA" se quedaron solo en la base local.
+- **Datos de acceso en `.env.produccion`**, que no se sube a GitHub: `DATABASE_URL`,
+  `PAYLOAD_SECRET` y el usuario del panel publicado (`admin@emanuel.test`, con contraseña
+  distinta a la local). Al publicar, esas variables se copian en Render.
+- **Las tablas se crean con migraciones** (`src/migrations/`). En el computador Payload
+  ajusta la base solo con `npm run dev`; en Neon no. Cada vez que cambie una colección
+  o un campo:
+  1. `npm run migrate:create nombre-del-cambio` y guardar el archivo nuevo en git.
+  2. En la página publicada, `npm run migrate` antes de encender. En Render, el comando
+     de inicio es `npm run migrate && npm start`.
+- **Nunca usar `npm run dev` contra Neon**, y cualquier otro comando contra Neon va con
+  `NODE_ENV=production`: en modo de desarrollo Payload cambia las tablas solo y desordena
+  las migraciones. Ejemplo: `set -a; . ./.env.produccion; set +a` y luego
+  `NODE_ENV=production npm run seed`.
+- No se usa `prodMigrations` de Payload, porque también correría las migraciones en
+  `npm run build` contra la base local, que no las usa.
+- Para administrar Neon desde la terminal: `npx neonctl` (ya autorizado en este Mac).
+- Probado (10 nov 2026): la página armada contra Neon muestra las tres categorías y el
+  panel deja entrar con el usuario de `.env.produccion`.
+
 ## Cómo está armado
 
 - `src/app/(frontend)/`: la página pública. `page.tsx` arma las secciones y
   `globals.css` tiene los colores y las letras (Tailwind 4, bloque `@theme`).
 - `src/app/(payload)/`: el panel y la API de Payload. Lo genera Payload; no se edita a mano.
 - `src/collections/`:
-  - `Trabajos`: video corto, YouTube o foto, con borradores.
+  - `Trabajos`: video corto, YouTube o foto, con borradores. La casilla "Mostrar en el
+    carrusel" decide qué sale en el carrusel.
   - `Categorias`: el nombre para el link se crea solo, sin tildes ni eñes.
   - `Media`: crea 5 tamaños webp de cada foto y una versión borrosa.
   - `Users`
@@ -149,8 +186,25 @@ se pueda entregar a otro desarrollador sin problema. Nada raro.
   componentes. Solo se muestran los trabajos publicados y completos.
 - `src/components/`:
   - `Entrada`: el nombre sube palabra por palabra y el video crece al bajar.
-  - `Trabajos`: carrusel de categorías.
+  - `Carrusel`: la "Selección", cuatro filas de trabajos que se mueven solas, como la
+    referencia del cliente. Decisiones de Sebastian (10 nov 2026):
+    - Emanuel escoge con la casilla del panel qué trabajos salen (ideal, unos 20).
+    - Son cuatro filas, como la referencia.
+    - Al tocar un trabajo se abre en el `Visor`, con flechas para pasar a los demás del
+      carrusel.
+
+    Cómo funciona:
+    - Va hacia la derecha a unos 20 px por segundo y se apura un poco al bajar por la
+      página.
+    - Se arrastra con el mouse o el dedo, y el cursor encima la detiene.
+    - Al pasar el cursor sale el título y la categoría.
+    - Con menos de 5 trabajos por fila, cada fila muestra todos en otro orden.
+    - Con "reducir movimiento" queda quieta y se desliza a mano.
+    - Las medidas de las filas están en `globals.css` (`.carrusel`).
+  - `Trabajos`: carrusel de categorías (la galería).
   - `Galeria`: cuadrícula de trabajos.
+  - `Medio`: la foto, el video sin sonido o la portada de YouTube de un trabajo en
+    miniatura (lo usan `Galeria` y `Carrusel`).
   - `Visor`: trabajo en grande, con flechas, deslizar y Escape.
   - `PantallaCarga`: la "E" del diseño original.
   - `ScrollSuave`: Lenis junto con GSAP.
@@ -186,6 +240,11 @@ se pueda entregar a otro desarrollador sin problema. Nada raro.
   4. `entrada-contactos.html`: hoja de contactos con fotos de varios eventos, una marcada
      en rojo; al bajar se entra a esa, que es un video. El cursor es una lupa.
   - Para sumar otra opción: crear el archivo y agregarlo en `catalogo.js` e `index.html`.
+  - **En línea (10 nov 2026):** https://emanuel-entradas.portafolioemanuel42.workers.dev,
+    en la cuenta de Cloudflare del proyecto (portafolioemanuel42@gmail.com), plan gratis.
+    Para actualizarlo: `npx wrangler@4 deploy` desde `prototipos/`
+    (`prototipos/wrangler.jsonc`). No se publican `servidor.mjs` ni `video-prueba.mp4`
+    (`.assetsignore`), y `_headers` pide a Google que no la muestre.
 - **Descartada: cámara que se desarma por piezas.** La referencia ya entra por el lente
   de una cámara ("A través del lente"), así que se vería copiada. Además habla del equipo
   y no del trabajo, y un modelo 3D pesa mucho en celular.
@@ -205,6 +264,7 @@ se pueda entregar a otro desarrollador sin problema. Nada raro.
       minimalista, en la rama `feat/proyecto-nextjs`
 - [x] Panel en español: trabajos, categorías, archivos y datos de la página
 - [x] Probado en computador y celular: galería, visor, video, YouTube y borradores
+- [x] Base de datos de la página publicada creada en Neon y probada
 - [ ] Contenido real del cliente
 - [ ] Publicar
 
@@ -212,8 +272,20 @@ se pueda entregar a otro desarrollador sin problema. Nada raro.
 
 - Respuestas del cliente: nombre, logo, tres palabras de estilo, categorías y forma de
   contacto.
-- Al publicar: crear las cuentas de Cloudflare, Render y Neon a nombre del cliente. R2
-  pide una tarjeta registrada aunque no cobre mientras no pase del límite gratis.
+- Al publicar: crear la cuenta de Render. Cloudflare y Neon ya están en la cuenta del
+  proyecto (portafolioemanuel42@gmail.com); falta decidir si se le entrega esa cuenta al
+  cliente o se pasa todo a una suya. R2 pide una tarjeta registrada aunque no cobre
+  mientras no pase del límite gratis.
+- **Aparecer en Google (en pausa, 10 nov 2026).** El cliente quiere salir cuando
+  busquen "fotógrafo" y similares. Hoy la página solo tiene título y descripción. Falta:
+  lista de páginas para Google (sitemap), robots, datos del negocio para Google, páginas
+  propias por categoría y, después de publicar, Google Search Console. Quedaron cuatro
+  preguntas sin responder:
+  1. Galerías como página propia (…/bodas) o como ventana.
+  2. Si Emanuel vende también fotografía o solo video.
+  3. La zona: Bogotá y alrededores, solo Bogotá, o toda Colombia.
+  4. Si se le escribe al cliente la guía para crear su Perfil de Empresa en Google y
+     pedir reseñas.
 - **Definir cómo se publica en dos partes.** Hoy es una sola aplicación de Next.js
   (página y panel). Para el plan gratis hay que separar la página pública, que va
   estática a Cloudflare, del panel, que va a Render, y conectar el aviso de "volver a
@@ -222,7 +294,11 @@ se pueda entregar a otro desarrollador sin problema. Nada raro.
   22.23.2. Funciona, pero sale una advertencia al instalar.
 - **Datos de prueba en la base local.** Hay cuatro trabajos "PRUEBA" en Bodas (tres
   publicados y un borrador) y tres archivos de prueba. Borrarlos antes de cargar el
-  contenido real.
+  contenido real. Los cuatro están marcados con "Mostrar en el carrusel" para probarlo.
+- **Carrusel en la base publicada (Neon).** La casilla nueva necesita el cambio
+  `src/migrations/20261111_032630_carrusel.ts`. Se aplica con `npm run migrate` al
+  publicar, como dice "Base de datos de la página publicada". Todavía no se ha aplicado
+  en Neon.
 - **Número de WhatsApp del cliente.** El botón aparece solo cuando se llena en el panel.
 - **Textos entre [corchetes]** en "Sobre mí": pendientes del cliente.
 - **Logo:** cambiar el logo de Payload en el panel por el de Emanuel cuando lo haya.

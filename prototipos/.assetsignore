@@ -1,0 +1,6 @@
+# Archivos de la carpeta que no se publican
+servidor.mjs
+wrangler.jsonc
+.assetsignore
+.wrangler
+video-prueba.mp4

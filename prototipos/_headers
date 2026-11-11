@@ -1,0 +1,3 @@
+# Cloudflare Pages: los prototipos no deben salir en Google
+/*
+  X-Robots-Tag: noindex, nofollow

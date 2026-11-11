@@ -31,6 +31,7 @@ export default defineConfig([
     'prototipos/**',
     'src/payload-types.ts',
     'src/payload-generated-schema.ts',
+    'src/migrations/**',
     'src/app/(payload)/admin/importMap.js',
   ]),
 ])

@@ -33,6 +33,8 @@ export type Pieza = {
   fecha?: string
   lugar?: string
   descripcion?: string
+  /** Nombre de su categoría (se usa en el carrusel, donde se mezclan todas). */
+  categoria?: string
 }
 
 export type CategoriaVista = {
@@ -152,6 +154,8 @@ export async function obtenerSitio(): Promise<SitioVista> {
 export async function obtenerPagina(): Promise<{
   sitio: SitioVista
   categorias: CategoriaVista[]
+  /** Trabajos marcados con "Mostrar en el carrusel", del más reciente al más antiguo. */
+  carrusel: Pieza[]
 }> {
   const payload = await getPayload({ config })
   const [sitio, categorias, trabajos] = await Promise.all([
@@ -168,9 +172,14 @@ export async function obtenerPagina(): Promise<{
 
   const idCategoria = (t: Trabajo) =>
     typeof t.categoria === 'object' ? t.categoria.id : t.categoria
+  const nombres = new Map(categorias.docs.map((c: Categoria) => [c.id, c.nombre]))
 
   return {
     sitio: aSitio(sitio),
+    carrusel: trabajos.docs
+      .filter((t) => t.carrusel)
+      .map((t) => ({ ...aPieza(t), categoria: nombres.get(idCategoria(t)) }))
+      .filter(sePuedeMostrar),
     categorias: categorias.docs.map((c: Categoria) => ({
       id: c.id,
       nombre: c.nombre,

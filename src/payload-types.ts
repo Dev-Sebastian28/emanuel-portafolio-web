@@ -153,6 +153,10 @@ export interface Trabajo {
    */
   portada?: (number | null) | Media;
   orientacion?: ('horizontal' | 'vertical') | null;
+  /**
+   * Aparece en las filas de fotos y videos que se mueven al inicio de la página. Conviene marcar lo mejor de cada categoría, unos 20 trabajos en total.
+   */
+  carrusel?: boolean | null;
   fecha?: string | null;
   lugar?: string | null;
   descripcion?: string | null;
@@ -377,6 +381,7 @@ export interface TrabajosSelect<T extends boolean = true> {
   foto?: T;
   portada?: T;
   orientacion?: T;
+  carrusel?: T;
   fecha?: T;
   lugar?: T;
   descripcion?: T;

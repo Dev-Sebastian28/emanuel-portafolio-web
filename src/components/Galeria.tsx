@@ -1,10 +1,8 @@
 'use client'
 
-/* eslint-disable @next/next/no-img-element -- La portada de respaldo viene de YouTube. */
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-import { Imagen } from '@/components/Imagen'
-import { VideoVista } from '@/components/VideoVista'
+import { IconoReproducir, Medio, proporcion } from '@/components/Medio'
 import { Visor } from '@/components/Visor'
 import { detalles } from '@/lib/detalles'
 import { bloquearScroll } from '@/lib/scroll'
@@ -12,25 +10,7 @@ import type { CategoriaVista, Pieza } from '@/lib/vista'
 
 const TAMANO_CUADRICULA = '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw'
 
-function IconoReproducir() {
-  return (
-    <svg viewBox="0 0 24 24" className="ml-0.5 h-4 w-4" aria-hidden="true">
-      <path d="M7 4.5v15l13-7.5z" fill="currentColor" />
-    </svg>
-  )
-}
-
 function Miniatura({ pieza, alAbrir }: { pieza: Pieza; alAbrir: () => void }) {
-  const foto = pieza.foto
-  const proporcion =
-    pieza.tipo === 'foto'
-      ? foto?.width && foto.height
-        ? `${foto.width} / ${foto.height}`
-        : '4 / 5'
-      : pieza.orientacion === 'vertical'
-        ? '9 / 16'
-        : '16 / 9'
-
   return (
     <button
       type="button"
@@ -40,37 +20,9 @@ function Miniatura({ pieza, alAbrir }: { pieza: Pieza; alAbrir: () => void }) {
     >
       <div
         className="bg-suave relative overflow-hidden rounded-[4px]"
-        style={{ aspectRatio: proporcion }}
+        style={{ aspectRatio: proporcion(pieza) }}
       >
-        {pieza.tipo === 'video' && pieza.video && (
-          <VideoVista
-            video={pieza.video}
-            poster={pieza.portada?.src}
-            className="absolute inset-0 h-full w-full object-cover"
-          />
-        )}
-        {pieza.tipo === 'youtube' &&
-          (pieza.portada ? (
-            <Imagen
-              imagen={pieza.portada}
-              sizes={TAMANO_CUADRICULA}
-              className="absolute inset-0 h-full w-full object-cover"
-            />
-          ) : (
-            <img
-              src={`https://i.ytimg.com/vi/${pieza.youtubeId}/hqdefault.jpg`}
-              alt=""
-              loading="lazy"
-              className="absolute inset-0 h-full w-full object-cover"
-            />
-          ))}
-        {pieza.tipo === 'foto' && foto && (
-          <Imagen
-            imagen={foto}
-            sizes={TAMANO_CUADRICULA}
-            className="absolute inset-0 h-full w-full object-cover"
-          />
-        )}
+        <Medio pieza={pieza} sizes={TAMANO_CUADRICULA} />
         {pieza.tipo !== 'foto' && (
           <span className="bg-fondo/90 text-tinta absolute bottom-3 left-3 grid h-10 w-10 place-items-center rounded-full transition-transform group-hover:scale-110">
             <IconoReproducir />

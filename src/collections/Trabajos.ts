@@ -34,7 +34,7 @@ export const Trabajos: CollectionConfig = {
   defaultSort: '-fecha',
   admin: {
     useAsTitle: 'titulo',
-    defaultColumns: ['titulo', 'categoria', 'tipo', 'fecha', '_status'],
+    defaultColumns: ['titulo', 'categoria', 'tipo', 'carrusel', 'fecha', '_status'],
     description: 'Cada video, link de YouTube o foto que se muestra en una categoría.',
   },
   versions: {
@@ -131,6 +131,17 @@ export const Trabajos: CollectionConfig = {
       admin: {
         position: 'sidebar',
         condition: esTipo('video', 'youtube'),
+      },
+    },
+    {
+      name: 'carrusel',
+      type: 'checkbox',
+      label: 'Mostrar en el carrusel',
+      defaultValue: false,
+      admin: {
+        position: 'sidebar',
+        description:
+          'Aparece en las filas de fotos y videos que se mueven al inicio de la página. Conviene marcar lo mejor de cada categoría, unos 20 trabajos en total.',
       },
     },
     {

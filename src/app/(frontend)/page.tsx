@@ -1,4 +1,5 @@
 import { Animaciones } from '@/components/Animaciones'
+import { Carrusel } from '@/components/Carrusel'
 import { Contacto } from '@/components/Contacto'
 import { Encabezado } from '@/components/Encabezado'
 import { Entrada } from '@/components/Entrada'
@@ -12,14 +13,16 @@ import { obtenerPagina } from '@/lib/vista'
 export const revalidate = 3600
 
 export default async function Inicio() {
-  const { sitio, categorias } = await obtenerPagina()
+  const { sitio, categorias, carrusel } = await obtenerPagina()
 
+  // Orden pedido por el cliente: entrada, carrusel, galería por categorías, sobre mí y contacto.
   return (
     <>
       <PantallaCarga letra={sitio.nombre.charAt(0)} />
       <Encabezado nombre={sitio.nombre} />
       <main>
         <Entrada sitio={sitio} />
+        <Carrusel piezas={carrusel} />
         <Trabajos categorias={categorias} />
         <SobreMi sitio={sitio} />
         <Contacto sitio={sitio} />
