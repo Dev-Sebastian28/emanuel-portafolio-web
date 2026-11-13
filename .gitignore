@@ -54,3 +54,6 @@ node_modules/
 
 # Cloudflare
 .wrangler
+
+# Copias de seguridad de la base del computador. No se suben.
+/respaldo/bases/

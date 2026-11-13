@@ -1,0 +1,235 @@
+/* Estilos de las piezas propias del panel. Usan los colores del panel (claro u oscuro). */
+
+/* ---------- Avisos al subir ---------- */
+
+.avisos {
+  display: grid;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.aviso {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.bien {
+  background: var(--theme-success-50, #ecfdf3);
+  border-color: var(--theme-success-200, #b7e4c7);
+  color: var(--theme-success-750, #14532d);
+}
+
+.ojo {
+  background: var(--theme-warning-50, #fff8e6);
+  border-color: var(--theme-warning-200, #f3d48b);
+  color: var(--theme-warning-750, #6b4500);
+}
+
+.grave {
+  background: var(--theme-error-50, #fdeeee);
+  border-color: var(--theme-error-200, #f2b8b5);
+  color: var(--theme-error-750, #7f1d1d);
+}
+
+/* ---------- Botón sobre la lista de trabajos ---------- */
+
+.barra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  margin: 0 0 1.25rem;
+  padding: 0.9rem 1rem;
+  border: 1px dashed var(--theme-elevation-200);
+  border-radius: 6px;
+}
+
+.barra p {
+  margin: 0;
+  flex: 1 1 18rem;
+  color: var(--theme-elevation-600);
+}
+
+/* ---------- Subir varias fotos ---------- */
+
+.subir {
+  max-width: 56rem;
+  padding: 1.5rem 0 4rem;
+}
+
+.subir h1 {
+  margin: 0 0 0.5rem;
+}
+
+.ayuda {
+  margin: 0 0 2rem;
+  color: var(--theme-elevation-600);
+  max-width: 44rem;
+}
+
+.formulario {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.campo {
+  display: grid;
+  gap: 0.4rem;
+  align-content: start;
+}
+
+.campo label {
+  font-weight: 600;
+}
+
+.campo input,
+.campo select {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0 0.85rem;
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: 4px;
+  background: var(--theme-input-bg, var(--theme-elevation-0));
+  color: var(--theme-text);
+  font: inherit;
+}
+
+.campo small {
+  color: var(--theme-elevation-500);
+  line-height: 1.4;
+}
+
+.casilla {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  grid-column: 1 / -1;
+}
+
+.casilla input {
+  margin-top: 0.3rem;
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.zona {
+  display: grid;
+  place-items: center;
+  gap: 0.35rem;
+  padding: 2.5rem 1rem;
+  margin-bottom: 1.5rem;
+  border: 2px dashed var(--theme-elevation-200);
+  border-radius: 8px;
+  text-align: center;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+}
+
+.zona:hover,
+.zonaActiva {
+  border-color: var(--theme-text);
+  background: var(--theme-elevation-50);
+}
+
+.zona strong {
+  font-size: 1.1rem;
+}
+
+.zona span {
+  color: var(--theme-elevation-500);
+}
+
+.lista {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.5rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.fila {
+  display: grid;
+  grid-template-columns: 4.5rem 1fr auto;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.75rem;
+  border: 1px solid var(--theme-elevation-100);
+  border-radius: 6px;
+}
+
+.fila img {
+  width: 4.5rem;
+  height: 4.5rem;
+  object-fit: cover;
+  border-radius: 4px;
+  background: var(--theme-elevation-100);
+}
+
+.fila p {
+  margin: 0;
+}
+
+.nombre {
+  font-weight: 600;
+  word-break: break-word;
+}
+
+.detalle {
+  color: var(--theme-elevation-500);
+  font-size: 0.9rem;
+}
+
+.estado {
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.estadoListo {
+  color: var(--theme-success-650, #15803d);
+}
+
+.estadoError {
+  color: var(--theme-error-650, #b91c1c);
+}
+
+.notaFila {
+  margin-top: 0.4rem !important;
+  font-size: 0.85rem;
+}
+
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.resumen {
+  margin: 0 0 1rem;
+  padding: 0.9rem 1rem;
+  border-radius: 6px;
+  background: var(--theme-elevation-50);
+}
+
+@media (max-width: 640px) {
+  .fila {
+    grid-template-columns: 3.5rem 1fr;
+  }
+
+  .fila img {
+    width: 3.5rem;
+    height: 3.5rem;
+  }
+
+  .estado {
+    grid-column: 2;
+  }
+}

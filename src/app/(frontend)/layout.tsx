@@ -31,6 +31,7 @@ export async function generateMetadata(): Promise<Metadata> {
     metadataBase: new URL(process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000'),
     title: titulo,
     description: descripcion,
+    icons: { icon: '/icono.svg' },
     openGraph: {
       title: titulo,
       description: descripcion,

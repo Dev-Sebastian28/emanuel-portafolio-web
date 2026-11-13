@@ -15,7 +15,8 @@ type Props = {
 
 const ALTO_MAXIMO = 'max-h-[calc(100svh-11rem)]'
 
-function Contenido({ pieza }: { pieza: Pieza }) {
+/** El trabajo en grande. También lo usa la vista previa del panel. */
+export function ContenidoVisor({ pieza }: { pieza: Pieza }) {
   if (pieza.tipo === 'video' && pieza.video) {
     return (
       <video
@@ -125,7 +126,7 @@ export function Visor({ piezas, indice, alCambiar, alCerrar }: Props) {
       </div>
 
       <div className="relative flex min-h-0 flex-1 items-center justify-center px-5 md:px-24">
-        <Contenido pieza={pieza} />
+        <ContenidoVisor pieza={pieza} />
         {total > 1 &&
           ([-1, 1] as const).map((paso) => (
             <button

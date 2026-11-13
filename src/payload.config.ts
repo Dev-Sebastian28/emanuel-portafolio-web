@@ -28,11 +28,56 @@ export default buildConfig({
     },
     meta: {
       titleSuffix: ' · Panel de Emanuel',
+      icons: [{ rel: 'icon', type: 'image/svg+xml', url: '/icono.svg' }],
+    },
+    components: {
+      // La "E" del diseño en vez del logo de Payload. Cuando llegue el logo de Emanuel, se cambia
+      // en estos dos archivos.
+      graphics: {
+        Logo: '/components/panel/Logo#Logo',
+        Icon: '/components/panel/Icono#Icono',
+      },
+      views: {
+        subirFotos: {
+          Component: '/components/panel/SubirFotos#SubirFotos',
+          path: '/subir-fotos',
+        },
+      },
     },
   },
   i18n: {
     supportedLanguages: { es },
     fallbackLanguage: 'es',
+    // Mensajes de error más claros que los de Payload: qué pasó y qué hacer.
+    translations: {
+      es: {
+        error: {
+          followingFieldsInvalid_one: 'Falta corregir este campo antes de guardar:',
+          followingFieldsInvalid_other: 'Falta corregir estos campos antes de guardar:',
+          correctInvalidFields:
+            'Hay campos por corregir: están marcados en rojo, con la explicación debajo.',
+          invalidFileType:
+            'Ese formato no se puede subir. Se aceptan fotos JPG, PNG, WEBP o AVIF y videos MP4 o WEBM.',
+          invalidFileTypeValue:
+            'El formato {{value}} no se puede subir. Se aceptan fotos JPG, PNG, WEBP o AVIF y videos MP4 o WEBM. Los .MOV y .HEIC del iPhone hay que exportarlos primero a MP4 o JPG.',
+          problemUploadingFile:
+            'Se cortó la subida del archivo. Hay que revisar la conexión a internet e intentarlo de nuevo.',
+          noFilesUploaded: 'No se subió ningún archivo: falta elegirlo.',
+          valueMustBeUnique: 'Ya existe otro con este mismo valor. Hay que usar uno distinto.',
+          notAllowedToPerformAction:
+            'Esta cuenta no tiene permiso para hacer eso. Puede que la sesión se haya cerrado: conviene volver a entrar.',
+          notAllowedToAccessPage:
+            'Esta cuenta no tiene permiso para ver esta página. Puede que la sesión se haya cerrado: conviene volver a entrar.',
+          emailOrPasswordIncorrect:
+            'El correo o la contraseña no coinciden. Hay que revisar que estén bien escritos (mayúsculas incluidas).',
+          tokenInvalidOrExpired: 'La sesión se venció. Hay que volver a entrar al panel.',
+          unableToDeleteCount:
+            'No se pudo borrar {{count}} de {{total}} {{label}}: alguno se está usando en la página. Al borrarlo de a uno se explica dónde.',
+          unknown:
+            'Algo salió mal y no se guardó. Conviene intentarlo de nuevo; si sigue pasando, avisarle a Sebastian.',
+        },
+      },
+    },
   },
   collections: [Trabajos, Categorias, Media, Users],
   globals: [Sitio],

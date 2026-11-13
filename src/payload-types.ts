@@ -76,7 +76,11 @@ export interface Config {
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    categorias: {
+      trabajos: 'trabajos';
+    };
+  };
   collectionsSelect: {
     trabajos: TrabajosSelect<false> | TrabajosSelect<true>;
     categorias: CategoriasSelect<false> | CategoriasSelect<true>;
@@ -126,75 +130,109 @@ export interface UserAuthOperations {
   };
 }
 /**
- * Cada video, link de YouTube o foto que se muestra en una categoría.
+ * Cada trabajo es un video, un link de YouTube o una foto, y sale en la galería de su categoría. Queda como borrador (no se ve en la página) hasta darle «Publicar cambios». El orden dentro de cada galería se cambia arrastrando, en la categoría.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "trabajos".
  */
 export interface Trabajo {
   id: number;
+  _trabajos_trabajos_order?: string | null;
   /**
-   * Por ejemplo: "Boda de Laura y Andrés".
+   * Sale debajo del trabajo en la galería y encima cuando se abre en grande. Por ejemplo: «Boda de Laura y Andrés».
    */
   titulo: string;
+  /**
+   * La galería donde sale el trabajo. Se puede cambiar cuando se quiera.
+   */
   categoria: number | Categoria;
+  /**
+   * Video corto: reels y clips de hasta 1 o 2 minutos, que se suben aquí. Video largo: el video completo del evento, que se sube a YouTube y aquí solo se pega el link. Foto: una foto suelta.
+   */
   tipo: 'video' | 'youtube' | 'foto';
   /**
-   * MP4, 1080p, 8 a 10 Mbps, con "Optimizar para web" activado. Hasta 1 o 2 minutos.
+   * En la galería se reproduce solo y sin sonido; al abrirlo, con sonido. MP4, 1080p, de 8 a 10 Mbps, con «Optimizar para web» activado. Hasta 1 o 2 minutos.
    */
   video?: (number | null) | Media;
   /**
-   * Puede estar como "No listado" en YouTube; igual se ve en la página.
+   * El link del botón «Compartir» del video. Puede estar como «No listado» en YouTube: igual se ve en la página. El video no carga hasta que la persona le da reproducir, así la página sigue rápida.
    */
   youtube?: string | null;
+  /**
+   * Sale en la galería con su forma original (vertical u horizontal) y en grande al abrirla. JPG en calidad máxima, de 3.000 a 4.000 px en el lado largo.
+   */
   foto?: (number | null) | Media;
   /**
-   * Imagen que se ve antes de reproducir. Mejor en alta calidad.
+   * La imagen que se ve antes de que el video empiece. En los de YouTube es obligatoria y reemplaza la de YouTube, que suele verse de baja calidad. Mejor en alta calidad y con la misma forma del video.
    */
   portada?: (number | null) | Media;
+  /**
+   * La forma del video. Cambia el recuadro en la galería y en el visor: horizontal (16:9) o vertical (9:16).
+   */
   orientacion?: ('horizontal' | 'vertical') | null;
   /**
    * Aparece en las filas de fotos y videos que se mueven al inicio de la página. Conviene marcar lo mejor de cada categoría, unos 20 trabajos en total.
    */
   carrusel?: boolean | null;
+  /**
+   * Cuándo fue el evento. Sale como mes y año («noviembre de 2026») debajo del título. El carrusel muestra primero lo más reciente.
+   */
   fecha?: string | null;
+  /**
+   * Opcional. Sale al lado de la fecha, por ejemplo: «Hacienda El Noviciado, Cota».
+   */
   lugar?: string | null;
+  /**
+   * Opcional. Por ahora no se muestra en la página; queda guardada para usarla más adelante (por ejemplo, para Google).
+   */
   descripcion?: string | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
 }
 /**
- * Las secciones del portafolio, por ejemplo Bodas, 15 años o Eventos.
+ * Las galerías de la página (Bodas, 15 años, Eventos…). Cada una es una tarjeta en la sección «Galería»; al tocarla se abren sus trabajos. Para cambiar el orden en que salen, se arrastran desde el ícono ⠿ de la izquierda en esta lista.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "categorias".
  */
 export interface Categoria {
   id: number;
+  _order?: string | null;
+  /**
+   * Título de la tarjeta en la página y de su galería. Por ejemplo: «Bodas».
+   */
   nombre: string;
   /**
-   * Opcional. Sale debajo del nombre en la tarjeta.
+   * Opcional. Sale debajo del nombre, en la tarjeta de la categoría. Mejor una sola línea, por ejemplo: «Historias de amor contadas en video».
    */
   descripcion?: string | null;
+  /**
+   * La foto de la tarjeta en la sección «Galería». Se ve vertical (3:4), así que conviene una foto vertical o con el centro de interés en el medio. Sin portada, la tarjeta sale en gris con el nombre.
+   */
   portada?: (number | null) | Media;
   /**
-   * Opcional. Clip corto sin sonido (6 a 12 segundos) que se reproduce en la tarjeta en vez de la portada.
+   * Opcional. Un clip corto (6 a 12 segundos), sin sonido, que se reproduce en la tarjeta en lugar de la portada. La portada se sigue usando mientras el video carga.
    */
   videoPortada?: (number | null) | Media;
   /**
-   * Se llena solo a partir del nombre.
+   * Así salen en la galería de esta categoría, de arriba hacia abajo. Para cambiar el orden se arrastran desde el ícono ⠿. Los trabajos nuevos salen de primeros.
+   */
+  trabajos?: {
+    docs?: (number | Trabajo)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  /**
+   * Se crea solo a partir del nombre, sin tildes ni eñes. Por ejemplo: 15-anos.
    */
   slug?: string | null;
-  /**
-   * Las de número menor salen primero.
-   */
   orden?: number | null;
   updatedAt: string;
   createdAt: string;
 }
 /**
- * Fotos y videos cortos. Fotos: JPG en calidad máxima, lado largo de 3000 a 4000 px. Videos: MP4, 1080p, 8 a 10 Mbps, con "Optimizar para web". Los videos largos van en YouTube.
+ * Todas las fotos y videos cortos de la página. Aquí se guardan; para que aparezcan en la página hay que usarlos en un trabajo, en una categoría o en "Datos de la página". Fotos: JPG en calidad máxima, de 3.000 a 4.000 px en el lado largo. Videos: MP4, 1080p, de 8 a 10 Mbps, con "Optimizar para web". Los videos largos van en YouTube.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
@@ -202,7 +240,7 @@ export interface Categoria {
 export interface Media {
   id: number;
   /**
-   * Qué se ve en el archivo. La usan Google y las personas que usan lector de pantalla.
+   * Qué se ve en la foto o el video, en pocas palabras (por ejemplo: «Novios saliendo de la iglesia»). No se ve en la página, pero Google la usa para entender las fotos y la leen en voz alta los celulares de personas con discapacidad visual.
    */
   alt?: string | null;
   desenfoque?: string | null;
@@ -261,6 +299,8 @@ export interface Media {
   };
 }
 /**
+ * Las personas que pueden entrar a este panel. Cada una entra con su correo y su contraseña, y puede cambiar todo el contenido. No se ven en la página.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
@@ -373,6 +413,7 @@ export interface PayloadMigration {
  * via the `definition` "trabajos_select".
  */
 export interface TrabajosSelect<T extends boolean = true> {
+  _trabajos_trabajos_order?: T;
   titulo?: T;
   categoria?: T;
   tipo?: T;
@@ -394,10 +435,12 @@ export interface TrabajosSelect<T extends boolean = true> {
  * via the `definition` "categorias_select".
  */
 export interface CategoriasSelect<T extends boolean = true> {
+  _order?: T;
   nombre?: T;
   descripcion?: T;
   portada?: T;
   videoPortada?: T;
+  trabajos?: T;
   slug?: T;
   orden?: T;
   updatedAt?: T;
@@ -540,35 +583,73 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   createdAt?: T;
 }
 /**
+ * Los textos y videos fijos de la página: la entrada, «Sobre mí» y el contacto. Los cambios se ven en la página apenas se guardan.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "sitio".
  */
 export interface Sitio {
   id: number;
+  /**
+   * Sale en grande en la entrada, arriba en el menú, en el pie de página y en la pestaña del navegador. También es lo que muestra Google como título.
+   */
   nombre: string;
   /**
-   * Sale debajo del nombre. Ej.: Videógrafo · Producción audiovisual.
+   * Sale encima del nombre en la entrada y junto al nombre en Google y en WhatsApp cuando se comparte el link. Ej.: Videógrafo · Producción audiovisual.
    */
   profesion?: string | null;
+  /**
+   * Sale en la entrada, al lado de «Qué hace», y en el pie de página. Ej.: Bogotá, Colombia.
+   */
   ciudad?: string | null;
+  /**
+   * El que se ve en computadores y tabletas. Horizontal (16:9), 1080p. Sin video, el recuadro sale en gris.
+   */
   videoEntrada?: (number | null) | Media;
+  /**
+   * Opcional. El que se ve en celulares, que llena mejor la pantalla. Vertical (9:16). Si se deja vacío, en celular se usa el horizontal.
+   */
   videoEntradaVertical?: (number | null) | Media;
+  /**
+   * Se ve un instante mientras carga el video, y es la imagen que aparece cuando se comparte el link de la página por WhatsApp o redes. Lo ideal: un cuadro del mismo video.
+   */
   portadaEntrada?: (number | null) | Media;
+  /**
+   * Foto de Emanuel, vertical (4:5). Sale al lado del texto. Sin foto, el recuadro sale en gris.
+   */
   retrato?: (number | null) | Media;
+  /**
+   * El título grande de la sección. Ej.: «Hola, soy Emanuel».
+   */
   tituloSobreMi?: string | null;
+  /**
+   * La presentación: quién es, cómo trabaja y qué lo diferencia. Lo ideal son 2 o 3 párrafos cortos; un renglón vacío separa los párrafos.
+   */
   sobreMi?: string | null;
+  /**
+   * Palabras cortas que salen como pastillas debajo del texto. Ej.: «Bodas», «Drone», «Edición». Mejor entre 3 y 6.
+   */
   etiquetas?:
     | {
         texto: string;
         id?: string | null;
       }[]
     | null;
+  /**
+   * Sale debajo de «Trabajemos juntos». Una o dos frases que inviten a escribir.
+   */
   textoContacto?: string | null;
   /**
-   * Solo números, con el indicativo del país. Ej.: 573001234567
+   * Activa el botón de WhatsApp, que abre un chat con un mensaje de saludo ya escrito. Solo números, con el 57 adelante. Ej.: 573001234567.
    */
   whatsapp?: string | null;
+  /**
+   * Activa el botón de correo.
+   */
   email?: string | null;
+  /**
+   * Activa el botón de Instagram. El link completo del perfil, por ejemplo https://www.instagram.com/emanuel.fonsecam/
+   */
   instagram?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
