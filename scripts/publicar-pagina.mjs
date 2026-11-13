@@ -33,9 +33,12 @@ const correr = (comando, args, opciones = {}) => {
   if (r.status !== 0) throw new Error(`Falló: ${comando} ${args.join(' ')}`)
 }
 
-// El archivo .env del computador (en Cloudflare o GitHub las variables ya vienen puestas).
-const archivoEnv = path.join(raiz, '.env')
-const variablesEnv = existsSync(archivoEnv) ? readFileSync(archivoEnv, 'utf8') : ''
+// El archivo de variables: en el computador manda .env.local (Neon + R2); si no existe,
+// se usa .env (Postgres y carpeta /media del computador).
+const archivoEnv = ['.env.local', '.env']
+  .map((nombre) => path.join(raiz, nombre))
+  .find((ruta) => existsSync(ruta))
+const variablesEnv = archivoEnv ? readFileSync(archivoEnv, 'utf8') : ''
 const usaR2 = Boolean(process.env.S3_BUCKET) || /^S3_BUCKET=\S/m.test(variablesEnv)
 
 try {

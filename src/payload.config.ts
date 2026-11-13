@@ -94,6 +94,8 @@ export default buildConfig({
   sharp,
   upload: {
     limits: { fileSize: 500 * 1024 * 1024 },
+    // Payload limita la petición multipart a 50 MB por defecto, aunque el archivo pueda pesar más.
+    requestSizeLimit: 500 * 1024 * 1024,
   },
   plugins: usarR2
     ? [

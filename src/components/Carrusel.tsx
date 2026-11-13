@@ -13,11 +13,11 @@ import type { Pieza } from '@/lib/vista'
  * y al tocar un trabajo se abre en grande. Los tamaños están en globals.css (.carrusel).
  */
 
-const FILAS = 4
+const FILAS = 2
 /** Con menos trabajos que esto por fila, cada fila los muestra todos en otro orden. */
 const MINIMO_POR_FILA = 5
 /** Dónde arranca cada fila, para que no se vean iguales. */
-const DESFASES = [0.12, 0.58, 0.31, 0.83]
+const DESFASES = [0.12, 0.58]
 /** Unos trabajos arriba y otros abajo dentro de su fila. */
 const ALTURAS = ['self-start', 'self-end', 'self-start', 'self-center', 'self-end', 'self-start']
 
@@ -33,6 +33,30 @@ function repartir(piezas: Pieza[]): Elemento[][] {
   return Array.from({ length: filas }, (_, f) =>
     elementos.map((_, i) => elementos[(i + f * paso) % elementos.length]),
   )
+}
+
+/**
+ * Alterna una pieza de cada categoría para que las filas mezclen bodas, vehículos, shows, etc.,
+ * en vez de salir en bloques del mismo trabajo. Dentro de cada categoría se respeta el orden
+ * (lo más reciente primero).
+ */
+function mezclarCategorias(piezas: Pieza[]): Pieza[] {
+  const grupos = new Map<string, Pieza[]>()
+  for (const pieza of piezas) {
+    const clave = pieza.categoria ?? ''
+    const grupo = grupos.get(clave)
+    if (grupo) grupo.push(pieza)
+    else grupos.set(clave, [pieza])
+  }
+  const listas = [...grupos.values()]
+  const salida: Pieza[] = []
+  for (let i = 0; salida.length < piezas.length; i++) {
+    for (const lista of listas) {
+      const pieza = lista[i]
+      if (pieza) salida.push(pieza)
+    }
+  }
+  return salida
 }
 
 const CONSULTA_QUIETO = '(prefers-reduced-motion: reduce)'
@@ -146,8 +170,8 @@ function Fila({
       activo: boolean
     } | null = null
 
-    // Unos 20 px por segundo, como la referencia; hacia la derecha.
-    const base = () => Math.min(30, Math.max(14, window.innerWidth * 0.017))
+    // Unos 35 px por segundo, hacia la derecha: más vivo que la referencia.
+    const base = () => Math.min(46, Math.max(22, window.innerWidth * 0.026))
     const meta = () => (encima || enfocado ? 0 : base())
     let velocidad = base()
 
@@ -366,7 +390,9 @@ function Fila({
 
 export function Carrusel({ piezas }: { piezas: Pieza[] }) {
   const quieto = useQuieto()
-  const filas = useMemo(() => repartir(piezas), [piezas])
+  // El visor recorre esta misma lista: así el índice de cada tarjeta siempre apunta a su pieza.
+  const orden = useMemo(() => mezclarCategorias(piezas), [piezas])
+  const filas = useMemo(() => repartir(orden), [orden])
   const [abierto, setAbierto] = useState<number | null>(null)
   const anterior = useRef<HTMLElement | null>(null)
 
@@ -417,7 +443,7 @@ export function Carrusel({ piezas }: { piezas: Pieza[] }) {
       </div>
 
       {abierto !== null && (
-        <Visor piezas={piezas} indice={abierto} alCambiar={setAbierto} alCerrar={cerrar} />
+        <Visor piezas={orden} indice={abierto} alCambiar={setAbierto} alCerrar={cerrar} />
       )}
     </section>
   )

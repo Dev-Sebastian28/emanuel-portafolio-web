@@ -3,6 +3,25 @@ import type { SitioVista } from '@/lib/vista'
 const boton =
   'inline-flex items-center gap-2 rounded-full px-7 py-3.5 text-sm transition-colors border'
 
+function IconoInstagram() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-4 w-4"
+      aria-hidden="true"
+    >
+      <rect x="2.5" y="2.5" width="19" height="19" rx="5.5" />
+      <circle cx="12" cy="12" r="4.2" />
+      <circle cx="17.4" cy="6.6" r="1" fill="currentColor" stroke="none" />
+    </svg>
+  )
+}
+
 export function Contacto({ sitio }: { sitio: SitioVista }) {
   const mensaje = encodeURIComponent(
     `Hola, ${sitio.nombre.split(' ')[0]}. Quiero información para un video.`,
@@ -52,7 +71,7 @@ export function Contacto({ sitio }: { sitio: SitioVista }) {
               rel="noopener noreferrer"
               className={`${boton} border-linea hover:border-tinta`}
             >
-              Instagram <span aria-hidden="true">↗</span>
+              <IconoInstagram /> Instagram
             </a>
           )}
         </div>
