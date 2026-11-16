@@ -4,8 +4,19 @@
     {
       "name": "prototipos",
       "runtimeExecutable": "node",
-      "runtimeArgs": ["prototipos/servidor.mjs"],
+      "runtimeArgs": [
+        "prototipos/servidor.mjs"
+      ],
       "port": 4321
+    },
+    {
+      "name": "pagina",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
+      "port": 3000
     }
   ]
 }

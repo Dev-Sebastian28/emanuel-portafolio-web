@@ -1,7 +1,11 @@
-import { Instrument_Serif } from 'next/font/google'
+import localFont from 'next/font/local'
 
 // La misma letra de los títulos de la página, para que el panel se sienta de Emanuel.
-const serif = Instrument_Serif({ subsets: ['latin'], weight: '400', display: 'swap' })
+const serif = localFont({
+  src: '../../fonts/InstrumentSerif-Regular.ttf',
+  weight: '400',
+  display: 'swap',
+})
 
 /** Logo de la pantalla de inicio de sesión. Cuando llegue el logo de Emanuel, se cambia aquí. */
 export function Logo() {

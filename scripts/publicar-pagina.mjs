@@ -47,6 +47,8 @@ try {
   mkdirSync(obra)
   execSync(`git archive --format=tar HEAD | tar -x -C "${obra}"`, { cwd: raiz, stdio: 'inherit' })
   rmSync(path.join(obra, 'src/app/(payload)'), { recursive: true, force: true })
+  // La vista previa de borradores es solo del panel.
+  rmSync(path.join(obra, 'src/app/(frontend)/vista-previa'), { recursive: true, force: true })
   rmSync(path.join(obra, 'prototipos'), { recursive: true, force: true })
   symlinkSync(path.join(raiz, 'node_modules'), path.join(obra, 'node_modules'), 'dir')
   if (variablesEnv) cpSync(archivoEnv, path.join(obra, '.env'))

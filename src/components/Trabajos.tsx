@@ -1,8 +1,8 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import Link from 'next/link'
+import { useRef } from 'react'
 
-import { Galeria } from '@/components/Galeria'
 import { Imagen } from '@/components/Imagen'
 import { Marcador } from '@/components/Marcador'
 import { VideoVista } from '@/components/VideoVista'
@@ -15,7 +15,6 @@ const claseMedio =
 
 export function Trabajos({ categorias }: { categorias: CategoriaVista[] }) {
   const pista = useRef<HTMLDivElement>(null)
-  const [abierta, setAbierta] = useState<CategoriaVista | null>(null)
 
   const mover = (direccion: 1 | -1) => {
     const el = pista.current
@@ -57,13 +56,12 @@ export function Trabajos({ categorias }: { categorias: CategoriaVista[] }) {
           className="sin-barra mt-12 flex [scroll-snap-type:x_mandatory] scroll-px-5 gap-4 overflow-x-auto px-5 pb-2 md:mt-16 md:scroll-px-10 md:gap-6 md:px-10"
         >
           {categorias.map((categoria, i) => (
-            <button
+            <Link
               key={categoria.id}
-              type="button"
+              href={`/${categoria.slug}`}
               data-aparecer
-              onClick={() => setAbierta(categoria)}
               aria-label={`Abrir ${categoria.nombre}: ${cuenta(categoria.piezas.length)}`}
-              className="group w-[78vw] shrink-0 snap-start text-left sm:w-[44vw] lg:w-[30vw]"
+              className="group block w-[78vw] shrink-0 snap-start text-left sm:w-[44vw] lg:w-[30vw]"
             >
               <div className="bg-suave relative aspect-[3/4] overflow-hidden rounded-[4px]">
                 {categoria.videoPortada ? (
@@ -99,12 +97,11 @@ export function Trabajos({ categorias }: { categorias: CategoriaVista[] }) {
               <span className="mt-4 inline-flex items-center gap-2 text-sm underline-offset-4 group-hover:underline">
                 Ver galería <span aria-hidden="true">→</span>
               </span>
-            </button>
+            </Link>
           ))}
         </div>
       )}
 
-      {abierta && <Galeria categoria={abierta} alCerrar={() => setAbierta(null)} />}
     </section>
   )
 }

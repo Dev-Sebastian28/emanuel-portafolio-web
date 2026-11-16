@@ -79,11 +79,325 @@
   cursor: grabbing;
 }
 
-/* Luz suave que sigue al cursor en la entrada (idea del diseño original). */
-.luz {
-  background: radial-gradient(
-    560px circle at var(--x, 50%) var(--y, 30%),
-    rgb(0 0 0 / 0.06),
-    transparent 65%
+/* Entrada "visor de grabación" (src/components/Entrada.tsx; prototipo en
+   prototipos/entrada-visor.html). El cuadro de enfoque reemplaza la luz del diseño original. */
+.visor {
+  --margen: 20px;
+  --rec: #e0322b;
+}
+@media (min-width: 768px) {
+  .visor {
+    --margen: 40px;
+  }
+}
+.visor-escenario {
+  position: relative;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  background: var(--color-fondo);
+}
+@media (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .visor-escenario {
+    cursor: none;
+  }
+  .visor-escenario a {
+    cursor: pointer;
+  }
+}
+.visor-nombre {
+  margin: 0;
+  font-size: clamp(4.5rem, 14vw, 15rem);
+  line-height: 0.86;
+  letter-spacing: -0.025em;
+}
+.visor-palabra {
+  position: absolute;
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.06em;
+}
+.visor-palabra-1 {
+  top: calc(64px + 2vh);
+  left: var(--margen);
+}
+.visor-palabra-2 {
+  bottom: 4vh;
+  right: var(--margen);
+  font-style: italic;
+}
+.visor-oficio {
+  position: absolute;
+  left: var(--margen);
+  bottom: calc(4vh + 0.4rem);
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.35;
+  color: var(--color-gris);
+}
+.visor-oficio strong {
+  display: block;
+  color: var(--color-tinta);
+  font-weight: 500;
+}
+.visor-pista {
+  position: absolute;
+  left: 50%;
+  top: calc(50% + var(--alto-visor, 30vh) / 2 + 18px);
+  transform: translateX(-50%);
+  font-size: 0.82rem;
+  color: var(--color-gris);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.visor-pista i {
+  display: inline-block;
+  font-style: normal;
+  animation: visor-baja 1.6s ease-in-out infinite;
+}
+@keyframes visor-baja {
+  50% {
+    transform: translateY(4px);
+  }
+}
+
+/* La pantalla de la cámara, con el video adentro */
+.visor-marco {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 2;
+  transform: translate(-50%, -50%);
+  width: min(36vw, 64vh);
+  aspect-ratio: 16 / 9;
+  background: #151515;
+  overflow: hidden;
+  container-type: size;
+}
+.visor-marco video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.visor-sin-video {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  text-align: center;
+  color: #bbb;
+  font: 500 0.75rem/1.5 ui-monospace, Menlo, monospace;
+  background: linear-gradient(135deg, #2a2a2a, #101010);
+}
+.visor-sombra {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgb(0 0 0 / 0.35),
+    transparent 22%,
+    transparent 78%,
+    rgb(0 0 0 / 0.3)
   );
+}
+.visor-hud {
+  --dentro: clamp(10px, 3.4cqw, 30px);
+  --hdr: 0px;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  color: #fff;
+  font: 500 clamp(9px, 2.1cqw, 15px) / 1 ui-monospace, Menlo, monospace;
+  letter-spacing: 0.06em;
+}
+.visor-hud > * {
+  position: absolute;
+  text-shadow: 0 1px 6px rgb(0 0 0 / 0.35);
+}
+.visor-rec {
+  top: calc(var(--dentro) + var(--hdr));
+  left: var(--dentro);
+  display: flex;
+  align-items: center;
+  gap: 0.55em;
+}
+.visor-rec em {
+  font-style: normal;
+}
+.visor-rec i {
+  width: 0.75em;
+  height: 0.75em;
+  border-radius: 50%;
+  background: #fff;
+  opacity: 0.6;
+}
+.visor-rec.grabando i {
+  background: var(--rec);
+  opacity: 1;
+  box-shadow: 0 0 8px rgb(224 50 43 / 0.7);
+  animation: visor-titila 1s steps(1) infinite;
+}
+@keyframes visor-titila {
+  50% {
+    opacity: 0;
+  }
+}
+.visor-tc {
+  top: calc(var(--dentro) + var(--hdr));
+  right: var(--dentro);
+  font-variant-numeric: tabular-nums;
+}
+.visor-formato {
+  bottom: var(--dentro);
+  left: var(--dentro);
+  opacity: 0.85;
+}
+.visor-bateria {
+  bottom: var(--dentro);
+  right: var(--dentro);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.visor-bateria b {
+  display: flex;
+  gap: 1.5px;
+  width: 1.9em;
+  height: 0.95em;
+  padding: 1.5px;
+  border: 1.5px solid #fff;
+  border-radius: 2px;
+}
+.visor-bateria b span {
+  flex: 1;
+  background: #fff;
+}
+.visor-bateria b span:last-child {
+  opacity: 0.25;
+}
+.visor-bateria::after {
+  content: '';
+  width: 2px;
+  height: 0.4em;
+  background: #fff;
+  border-radius: 0 1px 1px 0;
+}
+.visor-esquina {
+  --tam: clamp(12px, 4.2cqw, 38px);
+  width: var(--tam);
+  height: var(--tam);
+  border: 0 solid #fff;
+}
+.visor-esquina.arriba {
+  top: calc(var(--dentro) * 2.4 + var(--hdr));
+  border-top-width: 2px;
+}
+.visor-esquina.abajo {
+  bottom: calc(var(--dentro) * 2.4);
+  border-bottom-width: 2px;
+}
+.visor-esquina.izquierda {
+  left: var(--dentro);
+  border-left-width: 2px;
+}
+.visor-esquina.derecha {
+  right: var(--dentro);
+  border-right-width: 2px;
+}
+
+/* Las categorías, encima del video ya en pantalla completa */
+.visor-titulo {
+  position: absolute;
+  z-index: 3;
+  left: var(--margen);
+  right: var(--margen);
+  bottom: calc(5vh + env(safe-area-inset-bottom, 0px));
+  color: #fff;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.visor-titulo h2 {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 0.25em;
+  margin: 0;
+  font-size: clamp(2.6rem, 6.4vw, 5.8rem);
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+}
+.visor-titulo span {
+  white-space: nowrap;
+}
+.visor-titulo span + span::before {
+  content: '· ';
+}
+
+/* Cuadro de enfoque que sigue al cursor */
+.visor-enfoque {
+  --l: 11px;
+  --t: 1.5px;
+  position: absolute;
+  z-index: 4;
+  left: 0;
+  top: 0;
+  width: 68px;
+  height: 50px;
+  margin: -25px 0 0 -34px;
+  pointer-events: none;
+  opacity: 0;
+  color: var(--color-tinta);
+  background:
+    linear-gradient(currentColor, currentColor) left top / var(--l) var(--t),
+    linear-gradient(currentColor, currentColor) left top / var(--t) var(--l),
+    linear-gradient(currentColor, currentColor) right top / var(--l) var(--t),
+    linear-gradient(currentColor, currentColor) right top / var(--t) var(--l),
+    linear-gradient(currentColor, currentColor) left bottom / var(--l) var(--t),
+    linear-gradient(currentColor, currentColor) left bottom / var(--t) var(--l),
+    linear-gradient(currentColor, currentColor) right bottom / var(--l) var(--t),
+    linear-gradient(currentColor, currentColor) right bottom / var(--t) var(--l);
+  background-repeat: no-repeat;
+  transition: color 0.2s;
+}
+.visor-enfoque.sobre {
+  color: #fff;
+}
+
+/* Celular o pantalla vertical: visor vertical y el texto se acomoda */
+@media (orientation: portrait) {
+  .visor-nombre {
+    font-size: 22vw;
+  }
+  .visor-marco {
+    width: min(56vw, 25.9vh);
+    aspect-ratio: 9 / 16;
+  }
+  .visor-oficio {
+    bottom: auto;
+    top: calc(64px + 2vh + 22vw * 0.92 + 12px);
+  }
+  .visor-pista {
+    top: auto;
+    bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+  }
+  .visor-palabra-2 {
+    bottom: calc(4vh + 22px);
+  }
+  .visor-titulo h2 {
+    flex-direction: column;
+  }
+  .visor-titulo span + span::before {
+    content: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .visor-pista i,
+  .visor-rec.grabando i {
+    animation: none;
+  }
 }

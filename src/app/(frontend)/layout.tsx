@@ -2,43 +2,48 @@ import 'lenis/dist/lenis.css'
 import './globals.css'
 
 import type { Metadata } from 'next'
-import { Instrument_Sans, Instrument_Serif } from 'next/font/google'
+import localFont from 'next/font/local'
 import type { ReactNode } from 'react'
 
+import { Analitica } from '@/components/Analitica'
 import { ScrollSuave } from '@/components/ScrollSuave'
+import { INDEXAR, URL_SITIO } from '@/lib/seo'
 import { obtenerSitio } from '@/lib/vista'
 
-// Las fuentes se descargan al armar la página y se sirven desde la misma página (no desde Google).
-const serif = Instrument_Serif({
-  subsets: ['latin'],
-  weight: '400',
-  style: ['normal', 'italic'],
+// Las fuentes están guardadas en el proyecto (src/fonts, licencia libre OFL) y se sirven desde
+// la misma página: no dependen de Google al armarla ni al abrirla.
+const serif = localFont({
+  src: [
+    { path: '../../fonts/InstrumentSerif-Regular.ttf', style: 'normal', weight: '400' },
+    { path: '../../fonts/InstrumentSerif-Italic.ttf', style: 'italic', weight: '400' },
+  ],
   variable: '--font-instrument-serif',
   display: 'swap',
 })
 
-const sans = Instrument_Sans({
-  subsets: ['latin'],
+const sans = localFont({
+  src: '../../fonts/InstrumentSans.ttf',
+  weight: '400 700',
   variable: '--font-instrument-sans',
   display: 'swap',
 })
 
+/** Lo general para Google; cada página pone su título, descripción e imagen. */
 export async function generateMetadata(): Promise<Metadata> {
   const sitio = await obtenerSitio()
-  const titulo = [sitio.nombre, sitio.profesion].filter(Boolean).join(' — ')
-  const descripcion = `${sitio.nombre}: bodas, 15 años y eventos${sitio.ciudad ? ` en ${sitio.ciudad}` : ''}.`
   return {
-    metadataBase: new URL(process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000'),
-    title: titulo,
-    description: descripcion,
+    metadataBase: new URL(URL_SITIO),
+    title: { default: sitio.nombre, template: `%s — ${sitio.nombre}` },
+    applicationName: sitio.nombre,
     icons: { icon: '/icono.svg' },
-    openGraph: {
-      title: titulo,
-      description: descripcion,
-      type: 'website',
-      locale: 'es_CO',
-      images: sitio.portadaEntrada ? [{ url: sitio.portadaEntrada.src }] : undefined,
-    },
+    // Mientras no esté el dominio propio (INDEXAR=1), Google no la muestra.
+    robots: INDEXAR ? { index: true, follow: true } : { index: false, follow: false },
+    // Código de Search Console para comprobar que la página es de Emanuel.
+    verification: process.env.NEXT_PUBLIC_GOOGLE_VERIFICACION
+      ? { google: process.env.NEXT_PUBLIC_GOOGLE_VERIFICACION }
+      : undefined,
+    openGraph: { type: 'website', locale: 'es_CO', siteName: sitio.nombre },
+    twitter: { card: 'summary_large_image' },
   }
 }
 
@@ -51,6 +56,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         </noscript>
         <ScrollSuave />
         {children}
+        <Analitica />
       </body>
     </html>
   )

@@ -1,6 +1,10 @@
-import { Instrument_Serif } from 'next/font/google'
+import localFont from 'next/font/local'
 
-const serif = Instrument_Serif({ subsets: ['latin'], weight: '400', display: 'swap' })
+const serif = localFont({
+  src: '../../fonts/InstrumentSerif-Regular.ttf',
+  weight: '400',
+  display: 'swap',
+})
 
 /** Ícono pequeño del menú del panel: la "E" del diseño. */
 export function Icono() {

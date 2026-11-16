@@ -256,17 +256,56 @@ computador: `node scripts/publicar-pagina.mjs --publicar`.
      deploy hook.
 - Las claves de la página publicada viven en `.env.produccion`, que no se sube a GitHub.
 
+## Google (SEO, Analytics y Search Console)
+
+Decisiones de Sebastian (16 nov 2026):
+- Cada categoría tiene su propia página (…/bodas, …/15-anos).
+- Emanuel ofrece video y fotografía.
+- La zona es Bogotá y alrededores: Chía, Cajicá, Cota, La Calera, Sopó y otros (`ZONA`
+  en `src/lib/seo.ts`).
+- Google se activa cuando esté el dominio propio.
+
+Lo que ya está:
+- `src/lib/seo.ts` tiene los títulos y descripciones, la ficha del negocio para Google
+  (schema.org) y la ruta de cada categoría.
+- La ficha va en la página principal; cada categoría lleva su ruta (Inicio > Bodas).
+- Cada página tiene su dirección oficial (canonical) y la imagen que se ve al compartir
+  el link.
+- La página de cada categoría es `src/app/(frontend)/[categoria]/page.tsx`. Las tarjetas
+  de la galería llevan a ella.
+- `src/app/sitemap.ts` hace la lista de páginas para Google. `src/app/robots.ts` dice qué
+  puede revisar Google.
+- `src/components/Analitica.tsx` es Google Analytics. Se activa con `NEXT_PUBLIC_GA_ID`.
+- Search Console se verifica con `NEXT_PUBLIC_GOOGLE_VERIFICACION`.
+- Las letras están guardadas en `src/fonts` (licencia libre OFL), sin pedirlas a Google.
+  El 16 nov 2026 este Mac no podía conectarse a fonts.googleapis.com y el armado fallaba.
+
+Para activarlo, cuando esté el dominio:
+1. En la página publicada, `NEXT_PUBLIC_SERVER_URL` debe ser el dominio y se pone
+   `INDEXAR=1`. Mientras no esté `INDEXAR=1`, robots y `_headers` le piden a Google que
+   no entre.
+2. Crear la propiedad de Analytics con la cuenta del proyecto y poner su código en
+   `NEXT_PUBLIC_GA_ID`.
+3. Crear la propiedad de dominio en Search Console (se verifica en Cloudflare, por DNS) y
+   enviar `sitemap.xml`.
+4. Pendiente: escribirle al cliente la guía para crear su Perfil de Empresa en Google y
+   pedir reseñas.
+5. Revisar en el panel los nombres de las categorías: "Vehiculos" va sin tilde.
+
 ## Entrada (animación de inicio)
 
 - **Elegida (10 nov 2026): "visor de grabación".** El nombre en grande, y en el centro un
   recuadro con el video de entrada, como la pantalla de una cámara: esquinas, "REC" que
   titila y un contador de tiempo. Al bajar, el recuadro crece hasta llenar la pantalla.
   El cuadro de enfoque de la cámara sigue al cursor; reemplaza la luz del código del amigo.
+- **Ya está en la página real (16 nov 2026):** `src/components/Entrada.tsx`, con los
+  estilos en `globals.css` (`.visor`). Usa el video de entrada del panel (horizontal y
+  vertical) y, al llenar la pantalla, muestra los nombres de las categorías. La entrada
+  anterior quedó en `respaldo/Entrada-anterior.tsx`.
 - **Catálogo de entradas para comparar:** `prototipos/index.html`. Se abre con
   `node prototipos/servidor.mjs` (http://localhost:4321) o con la configuración
   "prototipos" de `.claude/launch.json`. Usan clips gratis de Mixkit; si se pone un
-  `video-prueba.mp4` en esa carpeta, usan ese. Ninguna está todavía en
-  `src/components/Entrada.tsx`.
+  `video-prueba.mp4` en esa carpeta, usan ese.
   1. `entrada-visor.html`: visor de grabación (la elegida por ahora).
   2. `entrada-ventana.html`: el video se ve a través de las letras del nombre y al bajar
      se entra por la "E".
@@ -311,16 +350,7 @@ computador: `node scripts/publicar-pagina.mjs --publicar`.
   proyecto (portafolioemanuel42@gmail.com); falta decidir si se le entrega esa cuenta al
   cliente o se pasa todo a una suya. R2 pide una tarjeta registrada aunque no cobre
   mientras no pase del límite gratis.
-- **Aparecer en Google (en pausa, 10 nov 2026).** El cliente quiere salir cuando
-  busquen "fotógrafo" y similares. Hoy la página solo tiene título y descripción. Falta:
-  lista de páginas para Google (sitemap), robots, datos del negocio para Google, páginas
-  propias por categoría y, después de publicar, Google Search Console. Quedaron cuatro
-  preguntas sin responder:
-  1. Galerías como página propia (…/bodas) o como ventana.
-  2. Si Emanuel vende también fotografía o solo video.
-  3. La zona: Bogotá y alrededores, solo Bogotá, o toda Colombia.
-  4. Si se le escribe al cliente la guía para crear su Perfil de Empresa en Google y
-     pedir reseñas.
+- **Google: falta activarlo con el dominio** (ver "Google").
 - **Terminar la etapa 2 de la publicación** (ver "Publicación"): faltan R2, Render y el
   aviso de Cloudflare.
 - **Actualizar Node.js.** Payload pide la versión 22.23.4 o más nueva; el Mac tiene la
