@@ -284,8 +284,11 @@ Para activarlo, cuando esté el dominio:
 1. En la página publicada, `NEXT_PUBLIC_SERVER_URL` debe ser el dominio y se pone
    `INDEXAR=1`. Mientras no esté `INDEXAR=1`, robots y `_headers` le piden a Google que
    no entre.
-2. Crear la propiedad de Analytics con la cuenta del proyecto y poner su código en
-   `NEXT_PUBLIC_GA_ID`.
+2. **Analytics ya está (16 nov 2026):** cuenta "Emanuel Fonseca", propiedad "Página web
+   Emanuel Fonseca" en portafolioemanuel42@gmail.com, con Colombia y pesos. Se apagaron
+   las opciones de compartir datos con Google. El código G-M7YPWK3S3R lo pone
+   `scripts/publicar-pagina.mjs` solo en la página publicada. Con el dominio, hay que
+   cambiar la dirección del flujo en Analytics.
 3. Crear la propiedad de dominio en Search Console (se verifica en Cloudflare, por DNS) y
    enviar `sitemap.xml`.
 4. Pendiente: escribirle al cliente la guía para crear su Perfil de Empresa en Google y

@@ -19,6 +19,9 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const NOMBRE = 'emanuel-fonseca'
+// Google Analytics de la página publicada (cuenta portafolioemanuel42@gmail.com, propiedad
+// "Página web Emanuel Fonseca"). No es secreto: se ve en el código de la página.
+const GA_ID = process.env.NEXT_PUBLIC_GA_ID || 'G-M7YPWK3S3R'
 const URL_PUBLICA =
   process.env.NEXT_PUBLIC_SERVER_URL || `https://${NOMBRE}.portafolioemanuel42.workers.dev`
 
@@ -61,6 +64,7 @@ try {
       EXPORTAR: '1',
       RAIZ_PROYECTO: raiz,
       NEXT_PUBLIC_SERVER_URL: URL_PUBLICA,
+      NEXT_PUBLIC_GA_ID: GA_ID,
       NODE_ENV: 'production',
       NODE_OPTIONS: '--no-deprecation --max-old-space-size=8000',
       NEXT_TELEMETRY_DISABLED: '1',
